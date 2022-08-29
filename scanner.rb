@@ -14,7 +14,7 @@ class Scanner
 
   def scan_tokens
     while !at_end? do
-      start = current
+      @start = current
       scan_token
     end
 
@@ -24,10 +24,9 @@ class Scanner
   private
 
   def scan_token
-    prev_char = peek
     advance
-puts prev_char
-    case prev_char
+
+    case @source[start]
     when '('
        add_token('LEFT_PAREN')
     when ')'
@@ -49,15 +48,15 @@ puts prev_char
     when '*'
        add_token('STAR');
     when '!'
-      add_token(next_char_matches?('=') ? 'BANG_EQUAL' : 'BANG')
+      add_token(current_matches?('=') ? 'BANG_EQUAL' : 'BANG')
     when '='
-      add_token(next_char_matches?('=') ? 'EQUAL_EQUAL' : 'EQUAL')
+      add_token(current_matches?('=') ? 'EQUAL_EQUAL' : 'EQUAL')
     when '<'
-      add_token(next_char_matches?('=') ? 'LESS_EQUAL' : 'LESS')
+      add_token(current_matches?('=') ? 'LESS_EQUAL' : 'LESS')
     when '>'
-      add_token(next_char_matches?('=') ? 'GREATER_EQUAL' : 'GREATER')
+      add_token(current_matches?('=') ? 'GREATER_EQUAL' : 'GREATER')
     when '/'
-      if next_char_matches?('/')
+      if current_matches?('/')
         while(peek != "\n" && !at_end?) do
           advance
         end
@@ -75,7 +74,7 @@ puts prev_char
 
   def peek
     return '\0' if at_end?
-    return source[current]
+    return source[start]
   end
 
   def current_matches?(expected_current_char)
@@ -95,7 +94,7 @@ puts prev_char
   end
 
   def add_token(type, literal=nil)
-    text = source[start..current]
+    text = source[start...current]
     tokens << Token.new(type, text, literal, line)
   end
 end
