@@ -1,4 +1,5 @@
 require "readline"
+require_relative './scanner'
 
 class Lox
   attr_reader :source, :had_error
@@ -27,7 +28,12 @@ class Lox
   private
 
   def run(source)
-    puts source
+    scanner = Scanner.new(source)
+    tokens = scanner.scan_tokens
+
+    tokens.each do |token|
+      token.to_s
+    end
   end
 
   def run_file(file)
