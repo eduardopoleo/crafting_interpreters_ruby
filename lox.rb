@@ -32,7 +32,7 @@ class Lox
     tokens = scanner.scan_tokens
 
     tokens.each do |token|
-      puts token.to_s
+      p token
     end
   end
 

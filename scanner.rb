@@ -26,7 +26,7 @@ class Scanner
   def scan_token
     advance
 
-    case @source[start]
+    case source[start]
     when '('
        add_token('LEFT_PAREN')
     when ')'
@@ -56,15 +56,18 @@ class Scanner
     when '>'
       add_token(current_matches?('=') ? 'GREATER_EQUAL' : 'GREATER')
     when '/'
-      if current_matches?('/')
+      if current_matches?('/') # means that is a comment
         while(peek != "\n" && !at_end?) do
-          advance
+          advance # advance until is done
         end
       else
         add_token('SLASH')
       end
+    when ' '
+    when "\r"
+    when "\t"
     when "\n"
-      add_token("")
+      @line += 1
     else
       # TODO get this to work with a top level error handler that
       # prints out the line etc
@@ -74,7 +77,7 @@ class Scanner
 
   def peek
     return '\0' if at_end?
-    return source[start]
+    return source[current]
   end
 
   def current_matches?(expected_current_char)
