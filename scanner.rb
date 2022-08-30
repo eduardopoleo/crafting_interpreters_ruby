@@ -68,11 +68,32 @@ class Scanner
     when "\t"
     when "\n"
       @line += 1
+    when '"'
+      store_string
     else
       # TODO get this to work with a top level error handler that
       # prints out the line etc
       raise "Character not recognized #{prev_char}"
     end
+  end
+
+  def store_string
+    while(peek != '"' && !at_end?) do
+      advance
+    end
+
+    raise "Unfinished string" if at_end?
+    
+    # the current is " advancing makes it so that the lexeme includes "
+    # cuz the end piece is non inclusive
+    advance
+
+    # the literal value should not include the "
+    # start + 1 gets rid of the "
+    # current - 1 places it back on the end " but because is not inclusive it only
+    # captures the literal 
+    literal_value = source[start+1...current-1]
+    add_token('STRING', literal_value)
   end
 
   def peek
@@ -97,7 +118,8 @@ class Scanner
   end
 
   def add_token(type, literal=nil)
-    text = source[start...current]
-    tokens << Token.new(type, text, literal, line)
+    lexeme = source[start...current] # the full lexeme as it was parsed from the algo
+    # literal is the actua value that matters
+    tokens << Token.new(type, lexeme, literal, line)
   end
 end
