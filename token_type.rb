@@ -24,11 +24,25 @@ class TokenType
   LESS_EQUAL = '<='
 
   # Literals.
-  # IDENTIFIER, STRING, NUMBER,
+  IDENTIFIER = 'IDENTIFIER'
+  # , STRING, NUMBER,
 
-  # Keywords.
-  # AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
-  # PRINT, RETURN, SUPER, THIS, TRUE, VAR, WHILE,
-
-  EOF
+  KEYWORDS = {
+    "and"    => 'AND',
+    "class"  => 'CLASS',
+    "else"   => 'ELSE',
+    "false"  => 'FALSE',
+    "for"    => 'FOR',
+    "fun"    => 'FUN',
+    "if"     => 'IF',
+    "nil"    => 'NIL',
+    "or"     => 'OR',
+    "print"  => 'PRINT',
+    "return" => 'RETURN',
+    "super"  => 'SUPER',
+    "this"   => 'THIS',
+    "true"   => 'TRUE',
+    "var"    => 'VAR',
+    "while"  => 'WHILE'
+  }
 end

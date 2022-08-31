@@ -73,6 +73,8 @@ class Scanner
     else
       if digit?(source[start])
         store_number
+      elsif alpha?(source[start])
+        store_identifier
       else
         # TODO get this to work with a top level error handler that
         # prints out the line etc
@@ -83,6 +85,25 @@ class Scanner
 
   def digit?(c)
     c.to_s =~ /[0-9]/
+  end
+
+  def alpha?(c)
+    (c >= 'a' && c < 'z') || (c >= 'A' && c <= 'Z') || c == '_'
+  end
+
+  def alpha_numeric?(c)
+    alpha?(c) || digit?(c)
+  end
+
+  def store_identifier
+    while(alpha_numeric?(peek)) do
+      advance
+    end
+
+    text = source[start...current]
+    type = TokenType::KEYWORDS[text]
+    type = TokenType::IDENTIFIER if type.nil?
+    add_token(type)
   end
   
   def store_number
@@ -97,6 +118,8 @@ class Scanner
       end
     end
 
+    # The literal number value is taken from start and current
+    # because it does not have to account for the ""
     literal_value = source[start...current].to_f
     add_token('NUMBER', literal_value)
   end
@@ -121,6 +144,7 @@ class Scanner
   end
 
   def peek_next
+    return "\0" if current + 1 >= source.length
     return source[current + 1]
   end
 
