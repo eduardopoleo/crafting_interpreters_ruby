@@ -71,10 +71,34 @@ class Scanner
     when '"'
       store_string
     else
-      # TODO get this to work with a top level error handler that
-      # prints out the line etc
-      raise "Character not recognized #{prev_char}"
+      if digit?(source[start])
+        store_number
+      else
+        # TODO get this to work with a top level error handler that
+        # prints out the line etc
+        raise "Character not recognized #{source[start]}"
+      end
     end
+  end
+
+  def digit?(c)
+    c.to_s =~ /[0-9]/
+  end
+  
+  def store_number
+    while(digit?(peek)) do
+      advance
+    end
+
+    if peek == '.' && digit?(peek_next)
+      advance
+      while(digit?(peek)) do
+        advance
+      end
+    end
+
+    literal_value = source[start...current].to_f
+    add_token('NUMBER', literal_value)
   end
 
   def store_string
@@ -91,13 +115,17 @@ class Scanner
     # the literal value should not include the "
     # start + 1 gets rid of the "
     # current - 1 places it back on the end " but because is not inclusive it only
-    # captures the literal 
+    # captures the literal
     literal_value = source[start+1...current-1]
     add_token('STRING', literal_value)
   end
 
+  def peek_next
+    return source[current + 1]
+  end
+
   def peek
-    return '\0' if at_end?
+    return "\0" if at_end?
     return source[current]
   end
 
