@@ -9,13 +9,13 @@ class TokenType
   MINUS = '-'
   PLUS = '+'
   SEMICOLON = ';'
-  SLASH='/'
-  STAR='*'
+  SLASH ='/'
+  STAR ='*'
   EOF = 'EOF'
 
   #  One or two character tokens.
-  BANG ='!'
-  BANG_EQUAL='!='
+  BANG = '!'
+  BANG_EQUAL = '!='
   EQUAL = '='
   EQUAL_EQUAL = '=='
   GREATER = '>'
@@ -25,7 +25,8 @@ class TokenType
 
   # Literals.
   IDENTIFIER = 'IDENTIFIER'
-  # , STRING, NUMBER,
+  STRING = 'STRING'
+  NUMBER = 'NUMBER'
 
   KEYWORDS = {
     "and"    => 'AND',
