@@ -1,7 +1,6 @@
 # If you're on the interpreter file just call this with
 # ruby ./ and the file will be generated 
 require 'erb'
-require_relative './expressions_template'
 
 class AstGenerator
   attr_reader :output_dir, :indent
@@ -30,7 +29,7 @@ class AstGenerator
 
   def define_ast(base_name, types)
     path = "#{output_dir}/#{base_name}.rb"
-    template = ERB.new(EXPRESSIONS_TEMPLATE, nil, '-')
+    template = ERB.new(File.read(__dir__  + '/expressions_template.rb'), nil, '-')
     File.open(path, 'w') { |f| f.write(template.result(binding)) }
   end
 end
