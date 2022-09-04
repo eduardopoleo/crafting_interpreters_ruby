@@ -123,17 +123,17 @@ class Parser
     if match?(Token::Type::LEFT_PAREN)
       advance
       exp = expression
+
+      raise "current #{current}, expecting ) and not found" unless match?(Token::Type::RIGHT_PAREN)
       advance
-
-      raise "expecting ) and not found" unless match?(Token::Type::RIGHT_PAREN)
-
       return Expression::Grouping.new(exp)
     end
   end
 
   def match?(types)
+
     return false if at_end?
-    
+
     types = Array(types)
     types.each do |type|
       return true if peek.type == type
