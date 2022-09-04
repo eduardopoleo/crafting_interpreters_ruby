@@ -30,7 +30,7 @@ class Lox
 
   def run(source)
     tokens = Scanner.new(source).scan
-    expression = Parser.new(tokens).parse
+    expression = Parser.parse(tokens)
 
     p expression
   end

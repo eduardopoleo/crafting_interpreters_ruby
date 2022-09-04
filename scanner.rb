@@ -14,15 +14,13 @@ class Scanner
   def scan
     while !at_end? do
       @start = current
-      scan
+      scan_tokens
     end
 
     tokens << Token.new(Token::Type::EOF, "", nil, line)
   end
 
-  private
-
-  def scan
+  def scan_tokens
     advance
 
     case source[start]

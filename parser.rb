@@ -1,5 +1,7 @@
+require_relative './expression'
+
 class Parser
-  attr_reader :tokens
+  attr_reader :tokens, :current
 
   def self.parse(tokens)
     new(tokens).parse
@@ -44,7 +46,7 @@ class Parser
     ]) do
       operator = peek
       advance
-      rigth = term
+      right = term
     end
 
     Expression::Binary.new(left, operator, right)
@@ -55,12 +57,12 @@ class Parser
     left = factor
 
     while match?([
-      Token::Type:MINUS,
+      Token::Type::MINUS,
       Token::Type::PLUS
     ]) do
       operator = peek
       advance
-      rigth = factor
+      right = factor
     end
 
     Expression::Binary.new(left, operator, right)
@@ -76,7 +78,7 @@ class Parser
     ]) do
       operator = peek
       advance
-      rigth = unary
+      right = unary
     end
 
     Expression::Binary.new(left, operator, right)
@@ -103,17 +105,17 @@ class Parser
       return exp
     end
 
-    if match?(Token::Type.KEYWORDS['true'])
+    if match?(Token::Type::KEYWORDS['true'])
       advance
       return Expression::Literal.new(true) 
     end
 
-    if match?(Token::Type.KEYWORDS['false'])
+    if match?(Token::Type::KEYWORDS['false'])
       advance
       return Expression::Literal.new(false)
     end
 
-    if match?(Token::Type.KEYWORDS['nil'])
+    if match?(Token::Type::KEYWORDS['nil'])
       advance
       return Expression::Literal.new(nil) 
     end
@@ -141,7 +143,7 @@ class Parser
   end
 
   def at_end?
-    return true if current >= tokens.length
+    return true if peek.type == Token::Type::EOF
   end
 
   def peek
