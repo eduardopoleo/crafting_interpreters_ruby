@@ -1,3 +1,5 @@
+# Generated file with all AST expressions type
+
 class Expression
 <%- types.each do |type, fields| -%>
   class <%= type.capitalize %>

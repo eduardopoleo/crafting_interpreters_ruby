@@ -1,3 +1,5 @@
+# Generated file with all AST expressions type
+
 class Expression
   class Binary
     attr_reader :left, :operator, :right

@@ -1,4 +1,3 @@
-require_relative './token_type'
 require_relative './token'
 
 class Scanner
@@ -12,49 +11,49 @@ class Scanner
     @line = 1
   end
 
-  def scan_tokens
+  def scan
     while !at_end? do
       @start = current
-      scan_token
+      scan
     end
 
-    tokens << Token.new(TokenType::EOF, "", nil, line)
+    tokens << Token.new(Token::Type::EOF, "", nil, line)
   end
 
   private
 
-  def scan_token
+  def scan
     advance
 
     case source[start]
     when '('
-       add_token(TokenType::LEFT_PAREN)
+       add_token(Token::Type::LEFT_PAREN)
     when ')'
-       add_token(TokenType::RIGHT_PAREN)
+       add_token(Token::Type::RIGHT_PAREN)
     when '{'
-       add_token(TokenType::LEFT_BRACE)
+       add_token(Token::Type::LEFT_BRACE)
     when '}'
-       add_token(TokenType::RIGHT_BRACE)
+       add_token(Token::Type::RIGHT_BRACE)
     when ','
-       add_token(TokenType::COMMA)
+       add_token(Token::Type::COMMA)
     when '.'
-       add_token(TokenType::DOT)
+       add_token(Token::Type::DOT)
     when '-'
-       add_token(TokenType::MINUS)
+       add_token(Token::Type::MINUS)
     when '+'
-       add_token(TokenType::PLUS)
+       add_token(Token::Type::PLUS)
     when ';'
-       add_token(TokenType::SEMICOLON)
+       add_token(Token::Type::SEMICOLON)
     when '*'
-       add_token(TokenType::STAR);
+       add_token(Token::Type::STAR);
     when '!'
-      add_token(current_matches?('=') ? TokenType::BANG_EQUAL : TokenType::BANG)
+      add_token(current_matches?('=') ? Token::Type::BANG_EQUAL : Token::Type::BANG)
     when '='
-      add_token(current_matches?('=') ? TokenType::EQUAL_EQUAL : TokenType::EQUAL)
+      add_token(current_matches?('=') ? Token::Type::EQUAL_EQUAL : Token::Type::EQUAL)
     when '<'
-      add_token(current_matches?('=') ? TokenType::LESS_EQUAL : TokenType::LESS)
+      add_token(current_matches?('=') ? Token::Type::LESS_EQUAL : Token::Type::LESS)
     when '>'
-      add_token(current_matches?('=') ? TokenType::GREATER_EQUAL : TokenType::GREATER)
+      add_token(current_matches?('=') ? Token::Type::GREATER_EQUAL : Token::Type::GREATER)
     when '/'
       if current_matches?('/') # means that is a comment
         while(peek != "\n" && !at_end?) do
@@ -71,7 +70,7 @@ class Scanner
           advance # advance until is done
         end
       else
-        add_token(TokenType::SLASH)
+        add_token(Token::Type::SLASH)
       end
     when ' '
     when "\r"
@@ -111,8 +110,8 @@ class Scanner
     end
 
     text = source[start...current]
-    type = TokenType::KEYWORDS[text]
-    type = TokenType::IDENTIFIER if type.nil?
+    type = Token::Type::KEYWORDS[text]
+    type = Token::Type::IDENTIFIER if type.nil?
     add_token(type)
   end
   
@@ -131,7 +130,7 @@ class Scanner
     # The literal number value is taken from start and current
     # because it does not have to account for the ""
     literal_value = source[start...current].to_f
-    add_token(TokenType::NUMBER, literal_value)
+    add_token(Token::Type::NUMBER, literal_value)
   end
 
   def store_string
@@ -150,7 +149,7 @@ class Scanner
     # current - 1 places it back on the end " but because is not inclusive it only
     # captures the literal
     literal_value = source[start+1...current-1]
-    add_token(TokenType::STRING, literal_value)
+    add_token(Token::Type::STRING, literal_value)
   end
 
   def peek_next
