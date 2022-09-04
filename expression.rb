@@ -13,6 +13,10 @@ class Expression
     def accept(visitor)
       visitor.visit_binary
     end
+
+    def to_s
+      " #{left.to_s} #{operator&.type} #{right.to_s} "
+    end
   end
 
   class Grouping
@@ -24,6 +28,10 @@ class Expression
 
     def accept(visitor)
       visitor.visit_grouping
+    end
+
+    def to_s
+      " #{expression.to_s} "
     end
   end
 
@@ -37,6 +45,10 @@ class Expression
     def accept(visitor)
       visitor.visit_literal
     end
+
+    def to_s
+      " #{value} "
+    end
   end
 
   class Unary
@@ -49,6 +61,10 @@ class Expression
 
     def accept(visitor)
       visitor.visit_unary
+    end
+
+    def to_s
+      " #{operator&.type} #{right.to_s} "
     end
   end
 

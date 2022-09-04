@@ -32,7 +32,7 @@ class Lox
     tokens = Scanner.new(source).scan
     expression = Parser.parse(tokens)
 
-    p expression
+    puts expression.to_s
   end
 
   def run_file(file)
