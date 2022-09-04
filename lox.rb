@@ -14,6 +14,10 @@ class Lox
     new(source).main
   end
 
+  def self.display_error(line, location, message)
+    puts "[line #{line}] Error #{location}: #{message}"
+  end
+
   def main
     if source.length > 1
       puts "Usage: lox [script]"
@@ -25,8 +29,6 @@ class Lox
       end
     end
   end
-
-  private
 
   def run(source)
     tokens = Scanner.new(source).scan
@@ -43,10 +45,6 @@ class Lox
   def run_prompt(command)
     run(command)
     @had_error = false
-  end
-
-  def display_error(line, location, message)
-    "[line #{line}] Error #{location}: #{message}"
   end
 end
 

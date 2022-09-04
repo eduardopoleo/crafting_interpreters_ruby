@@ -1,6 +1,8 @@
 require_relative './expression'
 
 class Parser
+  class ParseError < StandardError; end
+
   attr_reader :tokens, :current
 
   def self.parse(tokens)
@@ -124,7 +126,8 @@ class Parser
       advance
       exp = expression
 
-      raise "current #{current}, expecting ) and not found" unless match?(Token::Type::RIGHT_PAREN)
+      raise raise_error("expected ) at #{current}") if !match?(Token::Type::RIGHT_PAREN)
+        
       advance
       return Expression::Grouping.new(exp)
     end
@@ -140,6 +143,11 @@ class Parser
     end
 
     false
+  end
+
+  def raise_error(message)
+    Lox.display_error(peek.line, peek.lexeme, message)
+    raise ParseError.new(message)
   end
 
   def at_end?
