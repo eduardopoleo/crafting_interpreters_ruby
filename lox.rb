@@ -1,7 +1,8 @@
 require "readline"
 require_relative './scanner'
 require_relative './parser'
-require_relative './print_visitor'
+require_relative './ast_printer'
+require 'pp'
 
 class Lox
   attr_reader :source, :had_error
@@ -35,7 +36,7 @@ class Lox
     tokens = Scanner.new(source).scan
     expression = Parser.parse(tokens)
 
-    puts expression.accept(PrintVisitor)
+    puts expression.accept(AstPrinter)
   end
 
   def run_file(file)

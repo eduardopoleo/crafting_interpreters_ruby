@@ -30,20 +30,21 @@ class Parser
 
   # equality → comparison ( ( "!=" | "==" ) comparison )* ;
   def equality
-    left = comparison
+    exp = comparison
 
     while match?([Token::Type::BANG_EQUAL, Token::Type::EQUAL_EQUAL]) do
       operator = peek
       advance
       right = comparison
+      exp =  Expression::Binary.new(exp, operator, right)
     end
 
-    Expression::Binary.new(left, operator, right)
+    exp
   end
 
   # comparison → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
   def comparison
-    left = term
+    exp = term
 
     while match?([
       Token::Type::GREATER,
@@ -54,14 +55,15 @@ class Parser
       operator = peek
       advance
       right = term
+      exp = Expression::Binary.new(exp, operator, right)
     end
 
-    Expression::Binary.new(left, operator, right)
+    exp
   end
 
   # term → factor ( ( "-" | "+" ) factor )* ;
   def term
-    left = factor
+    exp = factor
 
     while match?([
       Token::Type::MINUS,
@@ -70,14 +72,15 @@ class Parser
       operator = peek
       advance
       right = factor
+      exp = Expression::Binary.new(exp, operator, right)
     end
 
-    Expression::Binary.new(left, operator, right)
+    exp
   end
 
   # factor → unary ( ( "/" | "*" ) unary )* ;
   def factor
-    left = unary
+    exp = unary
 
     while match?([
       Token::Type::SLASH,
@@ -86,9 +89,10 @@ class Parser
       operator = peek
       advance
       right = unary
+      exp = Expression::Binary.new(exp, operator, right)
     end
 
-    Expression::Binary.new(left, operator, right)
+    exp
   end
 
   # unary → ( "!" | "-" ) unary | primary ;

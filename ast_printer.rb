@@ -1,7 +1,7 @@
-class PrintVisitor
+class AstPrinter
   def self.visit_binary(exp)
     # Why do we need safe navigation here?
-    "#{exp.left&.accept(self)} #{exp.operator&.type} #{exp.right&.accept(self)}"
+    "#{exp.left.accept(self)} #{exp.operator.type} #{exp.right.accept(self)}"
   end
 
   def self.visit_grouping(exp)
