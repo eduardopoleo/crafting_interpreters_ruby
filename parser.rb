@@ -15,7 +15,12 @@ class Parser
   end
 
   def parse
-    expression
+    begin
+      expression
+    rescue Parser::ParseError => e
+      # To be continued maybe with syncronize
+      return nil
+    end
   end
 
   # expression → equality ;
@@ -126,11 +131,13 @@ class Parser
       advance
       exp = expression
 
-      raise raise_error("expected ) at #{current}") if !match?(Token::Type::RIGHT_PAREN)
+      raise_error("expected ) at #{current}") if !match?(Token::Type::RIGHT_PAREN)
         
       advance
       return Expression::Grouping.new(exp)
     end
+
+    raise_error('Expected expression')
   end
 
   def match?(types)
