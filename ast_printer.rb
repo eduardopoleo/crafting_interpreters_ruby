@@ -5,7 +5,7 @@ class AstPrinter
   end
 
   def self.visit_grouping(exp)
-    "#{exp.expression.accept(self)}"
+    "(#{exp.expression.accept(self)})"
   end
 
   def self.visit_literal(exp)
