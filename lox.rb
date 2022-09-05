@@ -2,7 +2,6 @@ require "readline"
 require_relative './scanner'
 require_relative './parser'
 require_relative './ast_printer'
-require 'pp'
 
 class Lox
   attr_reader :source, :had_error
