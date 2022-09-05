@@ -12,7 +12,7 @@ class Expression
     end
 
     def accept(visitor)
-      visitor.visit_<%= type %>
+      visitor.visit_<%= type %>(self)
     end
   end
 
