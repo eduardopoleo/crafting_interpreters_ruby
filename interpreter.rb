@@ -30,8 +30,11 @@ class Interpreter
     when Token::Type::STAR
       left * right
     when Token::Type::PLUS
-      left + right if valid_addition_operands?(left, right)
-      raise RuntimeError.new(exp.operator, "Operands shoud be all strings or numbers")
+      raise RuntimeError.new(
+        exp.operator,
+        "Operands shoud be all strings or numbers"
+      ) unless valid_addition_operands?(left, right)
+      left + right
     when Token::Type::GREATER
       check_binary_operands(exp.operator, left, right)
       left > right
