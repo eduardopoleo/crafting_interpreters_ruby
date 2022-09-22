@@ -12,6 +12,7 @@ class AstPrinter
     "#{exp.value}"
   end
 
+  # unary → ( "!" | "-" ) unary | primary ;
   def self.visit_unary(exp)
     "#{exp.operator.type} #{exp.right.accept(self)}"
   end

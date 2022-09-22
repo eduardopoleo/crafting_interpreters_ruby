@@ -9,7 +9,7 @@ class Token
   end
 
   def to_s
-    "type: #{type}, lexeme: #{lexeme}, literal: #{literal}"
+    "type: #{type}, lexeme: #{lexeme}, literal:  #{literal}"
   end
 
   class Type
