@@ -1,37 +1,52 @@
 class Interpreter
-  class RuntimeError < StandardError; end
+  class RuntimeError < StandardError
+    attr_reader :token
+  
+    def initialize(token, message)
+      @token = token
+      super(message)
+    end
+  end
+
+  def self.interpret(exp)
+    begin
+      evaluate(exp)
+    rescue RuntimeError => e
+      Lox.display_error(e.token.line, nil, e.message)
+    end
+  end
   # # E.g comparison → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
   def self.visit_binary(exp)
     left = evaluate(exp.left)
     right = evaluate(exp.right)
 
     case exp.operator.type
-    when Token::MINUS
-      check_binary_operands(operator, left, right)
+    when Token::Type::MINUS
+      check_binary_operands(exp.operator, left, right)
       left - right
-    when Token::SLASH
-      check_binary_operands(operator, left, right)
+    when Token::Type::SLASH
+      check_binary_operands(exp.operator, left, right)
       left / right
-    when Token::STAR
+    when Token::Type::STAR
       left * right
-    when Token::PLUS
+    when Token::Type::PLUS
       left + right if valid_addition_operands?(left, right)
-      raise RuntimeError.new("Operands shoud be all strings or numbers")
-    when Token::GREATER
-      check_binary_operands(operator, left, right)
+      raise RuntimeError.new(exp.operator, "Operands shoud be all strings or numbers")
+    when Token::Type::GREATER
+      check_binary_operands(exp.operator, left, right)
       left > right
-    when Token::GREATER_EQUAL
-      check_binary_operands(operator, left, right)
+    when Token::Type::GREATER_EQUAL
+      check_binary_operands(exp.operator, left, right)
       left >= right
-    when Token::LESS
-      check_binary_operands(operator, left, right)
+    when Token::Type::LESS
+      check_binary_operands(exp.operator, left, right)
       left < right
-    when Token::LESS_EQUAL
-      check_binary_operands(operator, left, right)
+    when Token::Type::LESS_EQUAL
+      check_binary_operands(exp.operator, left, right)
       left <= right
-    when Token::BANG_EQUAL
+    when Token::Type::BANG_EQUAL
       left != right
-    when Token::EQUAL_EQUAL
+    when Token::Type::EQUAL_EQUAL
       left == right
     end
   end
@@ -49,10 +64,10 @@ class Interpreter
     right = evaluate(exp.right)
   
     case exp.operator.type
-    when Type::MINUS
+    when Token::Type::MINUS
       check_unary_operand(operator, right)
       -right
-    when Type::BANG # Weird thing.
+    when Token::Type::BANG # Weird thing.
       !!right
     end
   end
@@ -63,16 +78,16 @@ class Interpreter
 
   def self.check_unary_operand(operator, operand)
     return if operand.is_a? Numeric
-    raise RuntimeError.new("#{operator} operand must be a number.")
+    raise RuntimeError.new(operator, "#{operator} operand must be a number.")
   end
 
   def self.check_binary_operands(operator, left, right)
-    return if left.is_a? Numeric && right.is_a? Numeric
-    raise RuntimeError.new("#{operator} operands must be numbers.") 
+    return if left.is_a?(Numeric) && right.is_a?(Numeric)
+    raise RuntimeError.new(operator, "#{operator} operands must be numbers.") 
   end
 
   def self.valid_addition_operands?(left, right)
-    (left.is_a? Numeric && right.is_a? Numeric) ||
-      (left.is_a? String && right.is_a? String)
+    (left.is_a?(Numeric) && right.is_a?(Numeric)) ||
+      (left.is_a?(String) && right.is_a?(String))
   end
 end

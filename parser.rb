@@ -36,7 +36,7 @@ class Parser
       operator = peek
       advance
       right = comparison
-      exp =  Expression::Binary.new(exp, operator, right)
+      exp = Expression::Binary.new(exp, operator, right)
     end
 
     exp
