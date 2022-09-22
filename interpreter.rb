@@ -86,7 +86,7 @@ class Interpreter
 
   def self.check_binary_operands(operator, left, right)
     return if left.is_a?(Numeric) && right.is_a?(Numeric)
-    raise RuntimeError.new(operator, "#{operator} operands must be numbers.") 
+    raise RuntimeError.new(operator, "#{operator.lexeme}'s operands must be numbers.") 
   end
 
   def self.valid_addition_operands?(left, right)
