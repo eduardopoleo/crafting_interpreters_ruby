@@ -13,6 +13,7 @@ class Token
   end
 
   class Type
+    # TODO; Changed all this by 'LEFT_PAREN' etc and the references
     LEFT_PAREN = '('
     RIGHT_PAREN = ')'
     LEFT_BRACE = '{'

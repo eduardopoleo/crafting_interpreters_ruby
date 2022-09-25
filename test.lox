@@ -5,7 +5,5 @@
   /*
 */
 
-print "one";
-print true;
-print 2 + 1;
+print 6 != 6;
 // more comments
