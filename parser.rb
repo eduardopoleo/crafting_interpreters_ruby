@@ -1,4 +1,5 @@
 require_relative './expression'
+require_relative './statement'
 
 class Parser
   class ParseError < StandardError; end
@@ -16,11 +17,37 @@ class Parser
 
   def parse
     begin
-      expression
+      statements = []
+      
+      while !at_end do
+        statements << statement
+      end
+
+      statements
     rescue Parser::ParseError => e
       # To be continued maybe with syncronize
       return nil
     end
+  end
+
+  def statement
+    return print_statement if match?(Token::Type::KEYWORDS['print'])
+
+    expression_statement
+  end
+  
+  def print_statement
+    value = expression
+    raise_error("expected ) at #{current}") unless match?(Token::Type::SEMICOLON)
+    advance
+    Statement::Print.new(value)
+  end
+
+  def expression_statement
+    exp = expression
+    raise_error("expected ) at #{current}") unless match?(Token::Type::SEMICOLON)
+    advance
+    Statement::Expression.new(exp)
   end
 
   # expression → equality ;
@@ -173,3 +200,12 @@ class Parser
     @current += 1
   end
 end
+
+__END__
+Check if the passed type is correct otherwise throw an error
+
+private Token consume(TokenType type, String message) {
+  if (check(type)) return advance();
+
+  throw error(peek(), message);
+}

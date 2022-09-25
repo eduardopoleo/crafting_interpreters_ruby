@@ -1,5 +1,5 @@
 # If you're on the interpreter file just call this with
-# ruby ./ and the file will be generated 
+# ruby ast_generator.rb ./ and the file will be generated 
 require 'erb'
 
 class AstGenerator
@@ -15,14 +15,20 @@ class AstGenerator
   end
 
   AST_ATTRIBUTES = {
-    'binary'   => ['left', 'operator', 'right'],
-    'grouping' => ['expression'],
-    'literal'  => ['value'],
-    'unary'    => ['operator', 'right']
+    'binary'      => ['left', 'operator', 'right'],
+    'grouping'    => ['expression'],
+    'literal'     => ['value'],
+    'unary'       => ['operator', 'right'],
+  }
+
+  AST_STATEMENTS = {
+    'expression' => ['expression'],
+    'print'      => ['expression']
   }
 
   def generate
     define_ast('expression', AST_ATTRIBUTES)
+    define_ast('statement', AST_STATEMENTS)
   end
 
   private

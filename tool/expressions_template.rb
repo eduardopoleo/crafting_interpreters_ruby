@@ -1,6 +1,6 @@
 # Generated file with all AST expressions type
 
-class Expression
+class <%= base_name.capitalize %>
 <%- types.each do |type, fields| -%>
   class <%= type.capitalize %>
     attr_reader <%= fields.map { |field| ':' + field }.join(', ') %>
