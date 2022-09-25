@@ -13,7 +13,7 @@ class Token
   end
 
   class Type
-    LEFT_PAREN = 'LEFT_PAREN'
+    LEFT_PAREN = '('
     RIGHT_PAREN = ')'
     LEFT_BRACE = '{'
     RIGHT_BRACE = '}'

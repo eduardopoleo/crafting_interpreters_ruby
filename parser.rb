@@ -19,7 +19,7 @@ class Parser
     begin
       statements = []
       
-      while !at_end do
+      while !at_end? do
         statements << statement
       end
 
@@ -31,7 +31,10 @@ class Parser
   end
 
   def statement
-    return print_statement if match?(Token::Type::KEYWORDS['print'])
+    if match?(Token::Type::KEYWORDS['print'])
+      advance
+      return print_statement
+    end
 
     expression_statement
   end
@@ -208,4 +211,15 @@ private Token consume(TokenType type, String message) {
   if (check(type)) return advance();
 
   throw error(peek(), message);
+}
+
+private boolean match(TokenType... types) {
+  for (TokenType type : types) {
+    if (check(type)) {
+      advance();
+      return true;
+    }
+  }
+
+  return false;
 }

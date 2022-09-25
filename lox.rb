@@ -34,9 +34,8 @@ class Lox
 
   def run(source)
     tokens = Scanner.new(source).scan
-    expression = Parser.parse(tokens)
-    result = Interpreter.interpret(expression)
-    puts result
+    statements = Parser.parse(tokens)
+    result = Interpreter.interpret(statements)
   end
 
   def run_file(file)

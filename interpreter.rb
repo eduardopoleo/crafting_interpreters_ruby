@@ -8,13 +8,25 @@ class Interpreter
     end
   end
 
-  def self.interpret(exp)
+  def self.interpret(statements)
     begin
-      evaluate(exp)
+      statements.each { |statement| evaluate(statement) }
     rescue RuntimeError => e
       Lox.display_error(e.token.line, nil, e.message)
     end
   end
+
+  def self.visit_expression(expression_statement)
+    evaluate(expression_statement.expression)
+    nil
+  end
+
+  def self.visit_print(print_statement)
+    value = evaluate(print_statement.expression)
+    puts value
+    nil
+  end
+
   # # E.g comparison → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
   def self.visit_binary(exp)
     left = evaluate(exp.left)
@@ -75,8 +87,8 @@ class Interpreter
     end
   end
 
-  def self.evaluate(exp)
-    exp.accept(self)
+  def self.evaluate(statement)
+    statement.accept(self)
   end
 
   def self.check_unary_operand(operator, operand)
