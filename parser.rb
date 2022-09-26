@@ -1,6 +1,10 @@
 require_relative './expression'
 require_relative './statement'
 
+# convers a "dumb" list sequential tokens into expressions
+# - each experession corresponds to a legal operation
+# - expressions match the grammar hierarchy and rules
+# - expressions compose on each other.
 class Parser
   class ParseError < StandardError; end
 
@@ -12,6 +16,9 @@ class Parser
 
   def initialize(tokens)
     @tokens = tokens
+    # We process the tokens 1 by 1.
+    # this might be cuz we do not need look aheads (which I doubt)
+    # or cuz the recursive nature of this.
     @current = 0
   end
 
@@ -40,8 +47,11 @@ class Parser
   end
   
   def print_statement
+    # we advance to get to the actual token that we want to print
     value = expression
-    raise_error("expected ) at #{current}") unless match?(Token::Type::SEMICOLON)
+    # if after all the expression has been resolved we do not have a semicolon fail
+    raise_error("expected ; at #{current}") unless match?(Token::Type::SEMICOLON)
+    # we consume the semi colon token.
     advance
     Statement::Print.new(value)
   end
@@ -53,6 +63,15 @@ class Parser
     Statement::Expression.new(exp)
   end
 
+  # The order of these are taking from the order of precedence in C
+  # Name	Operators	Associates
+  # Equality	== !=	Left
+  # Comparison	> >= < <=	Left
+  # Term	- +	Left
+  # Factor	/ *	Left
+  # Unary	! -	Right
+
+
   # expression → equality ;
   def expression
     equality
@@ -62,9 +81,16 @@ class Parser
   def equality
     exp = comparison
 
+    # The reason for the while loops once you get in here the first time
+    # all the other symbols will get resolved in the higher precedence methods.
+    # before you get back up. Then if you're here again it means that you're 
+    # either done or that you stumble upon another  ==, !=
     while match?([Token::Type::BANG_EQUAL, Token::Type::EQUAL_EQUAL]) do
+      # store the != 
       operator = peek
+      # consume it
       advance
+      # get ahold of the right end of the expression
       right = comparison
       exp = Expression::Binary.new(exp, operator, right)
     end
