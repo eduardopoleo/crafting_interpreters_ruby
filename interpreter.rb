@@ -10,7 +10,6 @@ class Interpreter
 
   def self.interpret(statements)
     begin
-      require 'pry'; binding.pry
       statements.each { |statement| evaluate(statement) }
     rescue RuntimeError => e
       Lox.display_error(e.token.line, nil, e.message)
@@ -30,6 +29,8 @@ class Interpreter
 
   # # E.g comparison → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
   def self.visit_binary(exp)
+    # It's sort of like DFS we evaluate expressions deep until we've
+    # evaluated the whole AST.
     left = evaluate(exp.left)
     right = evaluate(exp.right)
 
