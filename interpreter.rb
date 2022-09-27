@@ -10,6 +10,7 @@ class Interpreter
 
   def self.interpret(statements)
     begin
+      require 'pry'; binding.pry
       statements.each { |statement| evaluate(statement) }
     rescue RuntimeError => e
       Lox.display_error(e.token.line, nil, e.message)

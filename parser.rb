@@ -1,6 +1,17 @@
 require_relative './expression'
 require_relative './statement'
 
+# Recursive Descent based on this rules
+# expression     → equality ;
+# equality       → comparison ( ( "!=" | "==" ) comparison )* ;
+# comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+# term           → factor ( ( "-" | "+" ) factor )* ;
+# factor         → unary ( ( "/" | "*" ) unary )* ;
+# unary          → ( "!" | "-" ) unary
+#                | primary ;
+# primary        → NUMBER | STRING | "true" | "false" | "nil"
+#                | "(" expression ")" ;
+
 # convers a "dumb" list sequential tokens into expressions
 # - each experession corresponds to a legal operation
 # - expressions match the grammar hierarchy and rules
