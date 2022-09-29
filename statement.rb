@@ -25,4 +25,17 @@ class Statement
     end
   end
 
+  class Var
+    attr_reader :name, :initializer
+
+    def initialize(name, initializer)
+      @name = name
+      @initializer = initializer
+    end
+
+    def accept(visitor)
+      visitor.visit_var(self)
+    end
+  end
+
 end

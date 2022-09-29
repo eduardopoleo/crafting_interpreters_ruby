@@ -10,9 +10,6 @@ class Expression
       @right = right
     end
 
-    # The idea here is that functionality is contained in the visitor class
-    # All visitor classes are aware on how to deal with every single type of
-    # expressions and the logic on how to handle it
     def accept(visitor)
       visitor.visit_binary(self)
     end
@@ -52,6 +49,18 @@ class Expression
 
     def accept(visitor)
       visitor.visit_unary(self)
+    end
+  end
+
+  class Variable
+    attr_reader :name
+
+    def initialize(name)
+      @name = name
+    end
+
+    def accept(visitor)
+      visitor.visit_variable(self)
     end
   end
 

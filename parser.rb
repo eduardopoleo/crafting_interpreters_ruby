@@ -2,15 +2,17 @@ require_relative './expression'
 require_relative './statement'
 
 # Recursive Descent based on this rules
-# expression     → equality ;
-# equality       → comparison ( ( "!=" | "==" ) comparison )* ;
-# comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
-# term           → factor ( ( "-" | "+" ) factor )* ;
-# factor         → unary ( ( "/" | "*" ) unary )* ;
-# unary          → ( "!" | "-" ) unary
-#                | primary ;
-# primary        → NUMBER | STRING | "true" | "false" | "nil"
-#                | "(" expression ")" ;
+# program         → statement* EOF ;
+# declaration     → var_declaration | statement 
+# var_declaration → "var" IDENTIFIER ( "=" expression )? ";" ; ? if statement
+# statement       → exprStmt | printStmt ;# statments are different than expressions in that they are not evaluated directlly
+# expression      → equality ;
+# equality        → comparison ( ( "!=" | "==" ) comparison )* ;  # * means while loop 
+# comparison      → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+# term            → factor ( ( "-" | "+" ) factor )* ;
+# factor          → unary ( ( "/" | "*" ) unary )* ;
+# unary           → ( "!" | "-" ) unary | primary ;
+# primary         → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER; single identifer which is a var being accessed
 
 # convers a "dumb" list sequential tokens into expressions
 # - each experession corresponds to a legal operation
@@ -37,6 +39,8 @@ class Parser
     begin
       statements = []
       
+      # If the loops below finish means that we're found the end of the statment
+      # then the rest of the outstanding tokens are gonna be dump into a new statement
       while !at_end? do
         statements << statement
       end
