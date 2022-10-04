@@ -6,6 +6,8 @@
 */
 
 
-print 5 == 7 - 4 * 6 - 5 / 4 == 8 * 9 - 4 != 10;
-print 5 + 7;
+var a = 1;
+var b = 2;
+print a + b;
+
 // more comments

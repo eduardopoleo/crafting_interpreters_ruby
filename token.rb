@@ -41,7 +41,8 @@ class Token
     IDENTIFIER = 'IDENTIFIER'
     STRING = 'STRING'
     NUMBER = 'NUMBER'
-  
+    
+    # need
     KEYWORDS = {
       "and"    => 'AND',
       "class"  => 'CLASS',

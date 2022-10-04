@@ -4,7 +4,7 @@ require_relative './statement'
 # Recursive Descent based on this rules
 # program         → statement* EOF ;
 # declaration     → var_declaration | statement 
-# var_declaration → "var" IDENTIFIER ( "=" expression )? ";" ; ? if statement
+# var_declaration → "var" IDENTIFIER ( "=" expression )? ";"? (that's a conditional)
 # statement       → exprStmt | printStmt ;# statments are different than expressions in that they are not evaluated directlly
 # expression      → equality ;
 # equality        → comparison ( ( "!=" | "==" ) comparison )* ;  # * means while loop 
@@ -39,10 +39,10 @@ class Parser
     begin
       statements = []
       
-      # If the loops below finish means that we're found the end of the statment
+      # If the loops below finish means that we're found the end of the statement
       # then the rest of the outstanding tokens are gonna be dump into a new statement
       while !at_end? do
-        statements << statement
+        statements << declaration # whatever is at the top of the grammar hierachy goes here.
       end
 
       statements
@@ -50,6 +50,16 @@ class Parser
       # To be continued maybe with syncronize
       return nil
     end
+  end
+
+  def declaration
+# require 'pry'; binding.pry
+    if match?(Token::Type::KEYWORDS['var'])
+      advance
+      return var_declaration
+    end
+  
+    statement
   end
 
   def statement
@@ -86,6 +96,21 @@ class Parser
   # Factor	/ *	Left
   # Unary	! -	Right
 
+  def var_declaration
+    raise_error('Expected var identifier') unless match?(Token::Type::IDENTIFIER)
+    name = peek
+    advance
+
+    initializer = nil
+    if match?(Token::Type::EQUAL)
+      advance
+      initializer = expression
+    end
+
+    raise_error('Expected ; to finish statement') unless match?(Token::Type::SEMICOLON)
+    advance
+    Statement::Var.new(name, initializer)
+  end
 
   # expression → equality ;
   def expression
@@ -197,6 +222,12 @@ class Parser
       return Expression::Literal.new(false)
     end
 
+    if match?(Token::Type::IDENTIFIER)
+      exp = Expression::Variable.new(peek)
+      advance
+      return exp
+    end
+
     if match?(Token::Type::KEYWORDS['nil'])
       advance
       return Expression::Literal.new(nil) 
@@ -206,7 +237,7 @@ class Parser
       advance
       exp = expression
 
-      raise_error("expected ) at #{current}") if !match?(Token::Type::RIGHT_PAREN)
+      raise_error("expected ) at #{current}") unless match?(Token::Type::RIGHT_PAREN)
         
       advance
       return Expression::Grouping.new(exp)

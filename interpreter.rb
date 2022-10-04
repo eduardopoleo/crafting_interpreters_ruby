@@ -1,3 +1,5 @@
+require_relative './environment'
+
 class Interpreter
   class RuntimeError < StandardError
     attr_reader :token
@@ -16,6 +18,7 @@ class Interpreter
     end
   end
 
+  ### Visitor methods ###
   def self.visit_expression(expression_statement)
     evaluate(expression_statement.expression)
     nil
@@ -89,6 +92,21 @@ class Interpreter
     end
   end
 
+  def self.visit_var(statement)
+    value = nil
+    if !statement.initializer.nil?
+      value = evaluate(statement.initializer)
+    end
+
+    environment.define(statement.name.lexeme, value)
+    nil
+  end
+
+  def self.visit_variable(expression)
+    environment.get(expression.name)
+  end
+
+  ### Private methods ###
   def self.evaluate(statement)
     statement.accept(self)
   end

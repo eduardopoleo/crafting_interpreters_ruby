@@ -61,7 +61,4 @@ These productions lend themselves well to a recursive descent algo
 Each production must reference the production immdiately higher
 While loop ensure that we can handle multiple occurances of the same time of symbol
 
-
-
-
-
+TODO, the expression vs statement. Sometimes it's hard to know whether a takes a token or a string
