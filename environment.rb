@@ -24,7 +24,6 @@ class Environment
       name,
       "Variable not defined"
     ) unless values.has_key?(name)
-
     values[name]
   end
 end

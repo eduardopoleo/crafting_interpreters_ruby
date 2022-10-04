@@ -8,6 +8,7 @@
 
 var a = 1;
 var b = 2;
-print a + b;
+var c = a + b;
+print c;
 
 // more comments

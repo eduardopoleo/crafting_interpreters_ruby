@@ -1,6 +1,8 @@
 require_relative './environment'
 
 class Interpreter
+  attr_reader :environment, :statements
+
   class RuntimeError < StandardError
     attr_reader :token
   
@@ -11,6 +13,15 @@ class Interpreter
   end
 
   def self.interpret(statements)
+   new(statements).interpret
+  end
+
+  def initialize(statements)
+    @statements = statements
+    @environment = Environment.new
+  end
+
+  def interpret
     begin
       statements.each { |statement| evaluate(statement) }
     rescue RuntimeError => e
@@ -19,19 +30,19 @@ class Interpreter
   end
 
   ### Visitor methods ###
-  def self.visit_expression(expression_statement)
+  def visit_expression(expression_statement)
     evaluate(expression_statement.expression)
     nil
   end
 
-  def self.visit_print(print_statement)
+  def visit_print(print_statement)
     value = evaluate(print_statement.expression)
     puts value
     nil
   end
 
   # # E.g comparison → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
-  def self.visit_binary(exp)
+  def visit_binary(exp)
     # It's sort of like DFS we evaluate expressions deep until we've
     # evaluated the whole AST.
     left = evaluate(exp.left)
@@ -71,16 +82,16 @@ class Interpreter
     end
   end
 
-  def self.visit_grouping(exp)
+  def visit_grouping(exp)
     evaluate(exp.expression)
   end
 
-  def self.visit_literal(exp)
+  def visit_literal(exp)
     exp.value
   end
 
   # unary → ( "!" | "-" ) unary | primary ;
-  def self.visit_unary(exp)
+  def visit_unary(exp)
     right = evaluate(exp.right)
   
     case exp.operator.type
@@ -92,7 +103,7 @@ class Interpreter
     end
   end
 
-  def self.visit_var(statement)
+  def visit_var(statement)
     value = nil
     if !statement.initializer.nil?
       value = evaluate(statement.initializer)
@@ -102,26 +113,25 @@ class Interpreter
     nil
   end
 
-  def self.visit_variable(expression)
-    environment.get(expression.name)
+  def visit_variable(expression)
+    environment.get(expression.name.lexeme)
   end
 
-  ### Private methods ###
-  def self.evaluate(statement)
+  def evaluate(statement)
     statement.accept(self)
   end
 
-  def self.check_unary_operand(operator, operand)
+  def check_unary_operand(operator, operand)
     return if operand.is_a? Numeric
     raise RuntimeError.new(operator, "#{operator} operand must be a number.")
   end
 
-  def self.check_binary_operands(operator, left, right)
+  def check_binary_operands(operator, left, right)
     return if left.is_a?(Numeric) && right.is_a?(Numeric)
     raise RuntimeError.new(operator, "#{operator.lexeme}'s operands must be numbers.") 
   end
 
-  def self.valid_addition_operands?(left, right)
+  def valid_addition_operands?(left, right)
     (left.is_a?(Numeric) && right.is_a?(Numeric)) ||
       (left.is_a?(String) && right.is_a?(String))
   end
