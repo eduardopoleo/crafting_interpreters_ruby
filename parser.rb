@@ -2,17 +2,22 @@ require_relative './expression'
 require_relative './statement'
 
 # Recursive Descent based on this rules
+
 # program         → statement* EOF ;
 # declaration     → var_declaration | statement 
-# var_declaration → "var" IDENTIFIER ( "=" expression )? ";"? (that's a conditional)
-# statement       → exprStmt | printStmt ;# statments are different than expressions in that they are not evaluated directlly
+# var_declaration → "var" IDENTIFIER ( "=" expression )?;
+# statement       → exprStmt | printStmt ;
+# exprStmt        → expression;
+# printStmt       → "print" expression;
+
 # expression      → equality ;
-# equality        → comparison ( ( "!=" | "==" ) comparison )* ;  # * means while loop 
+# assignment      → IDENTIFIER "=" assignment | equality;
+# equality        → comparison ( ( "!=" | "==" ) comparison )* ;
 # comparison      → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 # term            → factor ( ( "-" | "+" ) factor )* ;
 # factor          → unary ( ( "/" | "*" ) unary )* ;
 # unary           → ( "!" | "-" ) unary | primary ;
-# primary         → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER; single identifer which is a var being accessed
+# primary         → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER;
 
 # convers a "dumb" list sequential tokens into expressions
 # - each experession corresponds to a legal operation
@@ -53,7 +58,6 @@ class Parser
   end
 
   def declaration
-# require 'pry'; binding.pry
     if match?(Token::Type::KEYWORDS['var'])
       advance
       return var_declaration
@@ -112,9 +116,27 @@ class Parser
     Statement::Var.new(name, initializer)
   end
 
-  # expression → equality ;
   def expression
-    equality
+    assignment
+  end
+
+  def assignment
+    exp = equality
+
+    if match?(Token::Type::EQUAL)
+      equals = peek
+      advance
+      value = assignment
+
+      if exp.is_a?(Expression::Variable)
+        name = exp.name
+        return Expression::Assign.new(name, value)
+      end
+
+      raise_error("=, Invalid assignment target")
+    end
+
+    return exp
   end
 
   # equality → comparison ( ( "!=" | "==" ) comparison )* ;

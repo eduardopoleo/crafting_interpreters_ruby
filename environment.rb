@@ -15,6 +15,15 @@ class Environment
     @values = {}
   end
 
+  def assign(name, value)
+    raise RuntimeError.new(
+      name,
+      "Variable not defined"
+    ) unless values.has_key?(name.lexeme)
+  
+    values[name.lexeme] = value
+  end
+
   def define(name, value)
     values[name] = value
   end

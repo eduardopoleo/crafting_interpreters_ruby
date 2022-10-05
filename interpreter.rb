@@ -29,6 +29,12 @@ class Interpreter
     end
   end
 
+  def visit_assign(exp)
+    value = evaluate(exp.value)
+    environment.assign(exp.name, value)
+    value
+  end
+
   ### Visitor methods ###
   def visit_expression(expression_statement)
     evaluate(expression_statement.expression)

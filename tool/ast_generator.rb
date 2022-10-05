@@ -15,6 +15,7 @@ class AstGenerator
   end
 
   AST_ATTRIBUTES = {
+    'assign'      => ['name', 'value'],
     'binary'      => ['left', 'operator', 'right'],
     'grouping'    => ['expression'],
     'literal'     => ['value'],
