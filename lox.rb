@@ -35,7 +35,7 @@ class Lox
   def run(source)
     tokens = Scanner.new(source).scan
     statements = Parser.parse(tokens)
-require 'pry'; binding.pry
+# require 'pry'; binding.pry
     result = Interpreter.interpret(statements)
   end
 
