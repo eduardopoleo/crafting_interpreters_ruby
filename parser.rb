@@ -120,12 +120,16 @@ class Parser
     assignment
   end
 
+  # Assignment is rigth associative
+  # a = (b = c) is correct cuz the R-value of a = makes sense
+  # (a = b) = c is not correct cuz it does not provide a place to store c
   def assignment
     exp = equality
 
     if match?(Token::Type::EQUAL)
       equals = peek
       advance
+      # This recursion loop ensures that this becomes right associative
       value = assignment
 
       if exp.is_a?(Expression::Variable)
@@ -180,21 +184,82 @@ class Parser
   end
 
   # term → factor ( ( "-" | "+" ) factor )* ;
+  # Left Associative
+  # should be left associative 
+  # 5 - 1 - 2 -----> (5 - 1) - 2 => 2 (CORRECT)
   def term
     exp = factor
 
     while match?([
       Token::Type::MINUS,
       Token::Type::PLUS
-    ]) do
+    ])
       operator = peek
       advance
+      # Accumulates, as it accumulates expressions it stores them
+      # accumulated exp get included to the left
       right = factor
       exp = Expression::Binary.new(exp, operator, right)
     end
 
     exp
   end
+
+  # exp -> literal 5
+
+  # LOOP 1
+  # operator -> -
+  # right 1
+  # exp1 -> 5 - 1
+
+  # LOOP 2
+  # operator -> -
+  # right 2
+  # exp -> exp1 - 2 -> (5-1) - 2
+
+  # It's left associative becuase the previous expression accumulates 
+  # and then gets feed back into the next expression
+
+  # result is the last calculated exp 
+
+
+  # Right associative
+  # 5 - 1 - 2 -----> 5 - (1 - 2) => 6 (WRONG)
+  # def term
+  #   exp = factor
+
+  #   if match?([
+  #     Token::Type::MINUS,
+  #     Token::Type::PLUS
+  #   ])
+  #     operator = peek
+  #     advance
+  #     The recursion makes it so that is DFS, it builds the expression on the right
+  #     Accumulated exp get included on the right
+  #     right = term
+  #     exp = Expression::Binary.new(exp, operator, right)
+  #   end
+
+  #   exp
+  # end
+
+  # RECURSE LOOP 1
+  # exp 5
+  # operator -
+  # PENDING loop
+  # right -> exp1
+  # exp2 -> 5 - exp1 -> 5 - (1 - 2)
+
+  # RECURSE LOOP 2
+  # exp 1
+  # operator -
+  # PENDING loop
+  # right -> 2
+  # exp1 -> 1 - 2
+
+  # RECURSE LOOP 3
+  # exp -> 2
+  # returns
 
   # factor → unary ( ( "/" | "*" ) unary )* ;
   def factor

@@ -6,8 +6,6 @@
 */
 
 
-var a = 5;
-a = 5 / 8 + 9;
-print a;
-
+print 5 - 1 - 2;
+// should be 2 not 6
 // more comments
