@@ -70,7 +70,7 @@ class Parser
       advance
       return print_statement
     end
-# require 'pry'; binding.pry
+
     if match?(Token::Type::LEFT_BRACE)
       advance
       return Statement::Block.new(block)

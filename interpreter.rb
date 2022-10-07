@@ -31,7 +31,7 @@ class Interpreter
 
   def visit_assign(exp)
     value = evaluate(exp.value)
-    environment.assign(exp.name, value)
+    environment.assign(exp.name.lexeme, value)
     value
   end
 
