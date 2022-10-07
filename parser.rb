@@ -6,9 +6,10 @@ require_relative './statement'
 # program         → statement* EOF ;
 # declaration     → var_declaration | statement 
 # var_declaration → "var" IDENTIFIER ( "=" expression )?;
-# statement       → exprStmt | printStmt ;
-# exprStmt        → expression;
+# statement       → exprStmt | printStmt | block ;
 # printStmt       → "print" expression;
+# block           → "{" declaration "}"
+# exprStmt        → expression;
 
 # expression      → equality ;
 # assignment      → IDENTIFIER "=" assignment | equality;
@@ -49,11 +50,9 @@ class Parser
       while !at_end? do
         statements << declaration # whatever is at the top of the grammar hierachy goes here.
       end
-
       statements
     rescue Parser::ParseError => e
-      # To be continued maybe with syncronize
-      return nil
+      raise_error("#{e.message} at #{current}")
     end
   end
 
@@ -71,6 +70,11 @@ class Parser
       advance
       return print_statement
     end
+# require 'pry'; binding.pry
+    if match?(Token::Type::LEFT_BRACE)
+      advance
+      return Statement::Block.new(block)
+    end
 
     expression_statement
   end
@@ -83,6 +87,20 @@ class Parser
     # we consume the semi colon token.
     advance
     Statement::Print.new(value)
+  end
+
+  def block
+    statements = []
+
+    # the at_end is to prevent infinite loops! if an } is never found the loop will
+    # never exit!
+    while(!match?(Token::Type::RIGHT_BRACE) && !at_end?)
+      statements << declaration
+    end
+
+    raise_error("Expected } at #{current}") unless match?(Token::Type::RIGHT_BRACE)
+    advance
+    statements
   end
 
   def expression_statement
@@ -329,7 +347,7 @@ class Parser
       advance
       return Expression::Grouping.new(exp)
     end
-
+require 'pry'; binding.pry
     raise_error('Expected expression')
   end
 

@@ -1,6 +1,18 @@
 # Generated file with all AST expressions type
 
 class Statement
+  class Block
+    attr_reader :statements
+
+    def initialize(statements)
+      @statements = statements
+    end
+
+    def accept(visitor)
+      visitor.visit_block(self)
+    end
+  end
+
   class Expression
     attr_reader :expression
 

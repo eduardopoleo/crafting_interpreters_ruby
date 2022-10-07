@@ -23,9 +23,9 @@ class Environment
   end
 
   def get(name)
-    return[name.lexeme] if values.has_key?(name.lexeme)
+    return values[name] if values.has_key?(name)
 
-    return enclosing.get(name.lexeme) if !enclosing.nil?
+    return enclosing.get(name) if !enclosing.nil?
 
     raise RuntimeError.new(
       name,
@@ -34,7 +34,7 @@ class Environment
   end
 
   def assign(name, value)
-    values[name.lexeme] = value if values.has_key?(name.lexeme)
+    values[name] = value if values.has_key?(name)
 
     enclosing.assign(name, value) if !enclosing.nil?
 

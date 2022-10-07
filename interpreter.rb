@@ -47,6 +47,21 @@ class Interpreter
     nil
   end
 
+  def visit_block(block_statement)
+    new_environment = Environment.new(environment)
+    previous_environment = environment
+
+    begin
+      @environment = new_environment
+
+      block_statement.statements.each do |statement|
+        evaluate(statement)
+      end
+    ensure
+      @environment = previous_environment
+    end
+  end
+
   # # E.g comparison → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
   def visit_binary(exp)
     # It's sort of like DFS we evaluate expressions deep until we've
@@ -123,6 +138,7 @@ class Interpreter
     environment.get(expression.name.lexeme)
   end
 
+  # def execute is equivalent to this 
   def evaluate(statement)
     statement.accept(self)
   end

@@ -24,6 +24,7 @@ class AstGenerator
   }
 
   AST_STATEMENTS = {
+    'block'      => ['statements'],
     'expression' => ['expression'],
     'print'      => ['expression'],
     'var'        => ['name', 'initializer']
