@@ -35,7 +35,7 @@ class Environment
 
   def assign(name, value)
     return values[name] = value if values.has_key?(name)
-# require 'pry'; binding.pry
+
     return enclosing.assign(name, value) if !enclosing.nil?
 
     raise RuntimeError.new(
