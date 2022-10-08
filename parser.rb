@@ -139,30 +139,43 @@ class Parser
   end
 
   def for_statement
+    # This will convert the for loop like this:
+    # for (var i = 0; i < 10; i = i + 1)
+    # print i;
+  
+    # into 
+    # {
+    #   var i = 0;
+    #   while (i < 10) {
+    #     print i;
+    #     i = i + 1;
+    #   }
+    # }
+
     raise_error("expected ( the for") unless match?(Token::Type::LEFT_PAREN)
     advance
-
     initializer = nil
+
     if match?(Token::Type::SEMICOLON)
+      advance
       initializer = nil
     elsif match?(Token::Type::KEYWORDS['var'])
+      advance
       initializer = var_declaration
     else
       initializer = expression_statement
     end
 
     condition = nil
-    if !match?(Token::Type::SEMICOLON)
-      advance
+  
+    if peek != Token::Type::SEMICOLON
       condition = expression
     end
-
     raise_error("expected ; the for") unless match?(Token::Type::SEMICOLON)
     advance
 
     increment = nil
-    if !match?(Token::Type::RIGHT_PAREN)
-      advance
+    if peek != Token::Type::RIGHT_PAREN
       increment = expression
     end
 
@@ -171,6 +184,8 @@ class Parser
 
     body = statement
 
+    # if there is an increment e.g i = i + 1 we append it
+    # to the last part of the body
     if increment
       body = Statement::Block.new([
         body,
@@ -178,9 +193,16 @@ class Parser
       ])
     end
 
-    condition = Expression::Literal.new(true) if condition
+    condition = Expression::Literal.new(true) unless condition
 
-    body = Statement::While.new(codition, body)
+    # we have the top level codition i < 10
+    # and the body with the increment appended at the end
+    body = Statement::While.new(condition, body)
+
+    # finally the initializer we add at the top if needed
+    if initializer
+      body = Statement::Block.new([initializer, body])
+    end
 
     body
   end
@@ -218,13 +240,11 @@ class Parser
     raise_error('Expected var identifier') unless match?(Token::Type::IDENTIFIER)
     name = peek
     advance
-
     initializer = nil
     if match?(Token::Type::EQUAL)
       advance
       initializer = expression
     end
-
     raise_error('Expected ; to finish statement') unless match?(Token::Type::SEMICOLON)
     advance
     Statement::Var.new(name, initializer)
@@ -266,6 +286,8 @@ class Parser
       rigth = and_exp
       exp = Expression::Logical(exp, operator, right)
     end
+
+    exp
   end
 
   def and_exp
@@ -277,6 +299,8 @@ class Parser
       rigth = equality
       exp = Expression::Logical(exp, operator, right)
     end
+
+    exp
   end
 
   # equality → comparison ( ( "!=" | "==" ) comparison )* ;
@@ -465,7 +489,7 @@ class Parser
       advance
       return Expression::Grouping.new(exp)
     end
-require 'pry'; binding.pry
+
     raise_error('Expected expression')
   end
 
