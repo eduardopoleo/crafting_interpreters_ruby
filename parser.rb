@@ -4,9 +4,13 @@ require_relative './statement'
 # Recursive Descent based on this rules
 
 # program         → statement* EOF ;
+
 # declaration     → var_declaration | statement 
 # var_declaration → "var" IDENTIFIER ( "=" expression )?;
+
 # statement       → exprStmt | ifStmt | printStmt | while | block ;
+# for_statment    → "for" "(" varDcl | expStm | ";" | expression? ";" | expression")" statement; 
+# https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for
 # if_statment     → "if" "(" expression ")" ("else" statement)? ;
 # printStmt       → "print" expression;
 # block           → "{" declaration "}"
@@ -85,6 +89,11 @@ class Parser
       return while_statement
     end
 
+    if match?(Token::Type::KEYWORDS['for'])
+      advance
+      return for_statement
+    end
+
     if match?(Token::Type::LEFT_BRACE)
       advance
       return Statement::Block.new(block)
@@ -127,6 +136,53 @@ class Parser
     body = statement
 
     Statement::While.new(condition, body)
+  end
+
+  def for_statement
+    raise_error("expected ( the for") unless match?(Token::Type::LEFT_PAREN)
+    advance
+
+    initializer = nil
+    if match?(Token::Type::SEMICOLON)
+      initializer = nil
+    elsif match?(Token::Type::KEYWORDS['var'])
+      initializer = var_declaration
+    else
+      initializer = expression_statement
+    end
+
+    condition = nil
+    if !match?(Token::Type::SEMICOLON)
+      advance
+      condition = expression
+    end
+
+    raise_error("expected ; the for") unless match?(Token::Type::SEMICOLON)
+    advance
+
+    increment = nil
+    if !match?(Token::Type::RIGHT_PAREN)
+      advance
+      increment = expression
+    end
+
+    raise_error("expected ) the for") unless match?(Token::Type::RIGHT_PAREN)
+    advance
+
+    body = statement
+
+    if increment
+      body = Statement::Block.new([
+        body,
+        Statement::Expression.new(increment)
+      ])
+    end
+
+    condition = Expression::Literal.new(true) if condition
+
+    body = Statement::While.new(codition, body)
+
+    body
   end
 
   def block
