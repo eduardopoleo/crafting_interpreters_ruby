@@ -19,6 +19,7 @@ class AstGenerator
     'binary'      => ['left', 'operator', 'right'],
     'grouping'    => ['expression'],
     'literal'     => ['value'],
+    'logical'     => ['left', 'operator', 'right'],
     'unary'       => ['operator', 'right'],
     'variable'    => ['name']
   }
@@ -26,6 +27,7 @@ class AstGenerator
   AST_STATEMENTS = {
     'block'      => ['statements'],
     'expression' => ['expression'],
+    'if'         => ['condition', 'then_branch', 'else_branch'],
     'print'      => ['expression'],
     'var'        => ['name', 'initializer']
   }

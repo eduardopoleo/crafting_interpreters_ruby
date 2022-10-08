@@ -52,6 +52,20 @@ class Expression
     end
   end
 
+  class Logical
+    attr_reader :left, :operator, :right
+
+    def initialize(left, operator, right)
+      @left = left
+      @operator = operator
+      @right = right
+    end
+
+    def accept(visitor)
+      visitor.visit_logical(self)
+    end
+  end
+
   class Unary
     attr_reader :operator, :right
 

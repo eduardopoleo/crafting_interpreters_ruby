@@ -29,13 +29,39 @@ class Interpreter
     end
   end
 
+  ### Visitor methods ###
+  def visit_if(if_statement)
+    if evaluate(if_statement.condition)
+      execute(if_statement.then_branch)
+    elsif if_statement.else_brach
+      execute(if_statement.else_brach)
+    end
+    nil
+  end
+
+  def visit_logical(exp)
+    left = evaluate(exp.left)
+
+    if exp.operator.type == Token::TokenType::KEYWORDS['or']
+      # return "true" if it's an or the first operand is true
+      return left if left
+    else
+      # return "false" if it's an and and the first operand if false
+      return left if !left
+    end
+
+    # if or and operand1 false
+    # if and and operand2 true
+    # both of these cases require checking on the right operand 
+    return evaluate(exp.right)
+  end
+  
   def visit_assign(exp)
     value = evaluate(exp.value)
     environment.assign(exp.name.lexeme, value)
     value
   end
 
-  ### Visitor methods ###
   def visit_expression(expression_statement)
     evaluate(expression_statement.expression)
     nil

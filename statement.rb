@@ -25,6 +25,20 @@ class Statement
     end
   end
 
+  class If
+    attr_reader :condition, :then_branch, :else_branch
+
+    def initialize(condition, then_branch, else_branch)
+      @condition = condition
+      @then_branch = then_branch
+      @else_branch = else_branch
+    end
+
+    def accept(visitor)
+      visitor.visit_if(self)
+    end
+  end
+
   class Print
     attr_reader :expression
 

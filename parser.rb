@@ -6,13 +6,16 @@ require_relative './statement'
 # program         → statement* EOF ;
 # declaration     → var_declaration | statement 
 # var_declaration → "var" IDENTIFIER ( "=" expression )?;
-# statement       → exprStmt | printStmt | block ;
+# statement       → exprStmt | ifStmt | printStmt | block ;
+# if_statment     → "if" "(" expression ")" ("else" statement)? ;
 # printStmt       → "print" expression;
 # block           → "{" declaration "}"
 # exprStmt        → expression;
 
 # expression      → equality ;
-# assignment      → IDENTIFIER "=" assignment | equality;
+# assignment      → IDENTIFIER "=" assignment | logic_or;
+# logic_or        → logic_and ("or" logic_and)*;
+# logic_and       → equality ("and" equality)*;
 # equality        → comparison ( ( "!=" | "==" ) comparison )* ;
 # comparison      → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 # term            → factor ( ( "-" | "+" ) factor )* ;
@@ -66,6 +69,11 @@ class Parser
   end
 
   def statement
+    if match?(Token::Type::KEYWORDS['if'])
+      advance
+      return if_statement
+    end
+
     if match?(Token::Type::KEYWORDS['print'])
       advance
       return print_statement
@@ -79,6 +87,21 @@ class Parser
     expression_statement
   end
   
+  def if_statement
+    raise_error("Expected ( at #{current}") unless match?(Token::TokenType::LEFT_PAREN)
+    advance
+    condition = expression
+    raise_error("Expected ( at #{current}") unless match?(Token::TokenType::RIGHT_PAREN)
+    advance
+    then_branch = statement
+    else_brach = nil
+    if match?(Token::TokenType::KEYWORDS['else'])
+      else_branch = statement
+    end
+
+    Statement::If.new(condition, then_branch, else_brach)
+  end
+
   def print_statement
     # we advance to get to the actual token that we want to print
     value = expression
@@ -142,7 +165,7 @@ class Parser
   # a = (b = c) is correct cuz the R-value of a = makes sense
   # (a = b) = c is not correct cuz it does not provide a place to store c
   def assignment
-    exp = equality
+    exp = or_exp
 
     if match?(Token::Type::EQUAL)
       equals = peek
@@ -159,6 +182,28 @@ class Parser
     end
 
     return exp
+  end
+
+  def or_exp
+    exp = and_exp
+
+    while(match?(Token::Type::KEYWORDS['or']))
+      operator = peek
+      advance
+      rigth = and_exp
+      exp = Expression::Logical(exp, operator, right)
+    end
+  end
+
+  def and_exp
+    exp = equality
+
+    while(match?(Token::Type::KEYWORDS['and']))
+      operator = peek
+      advance
+      rigth = equality
+      exp = Expression::Logical(exp, operator, right)
+    end
   end
 
   # equality → comparison ( ( "!=" | "==" ) comparison )* ;

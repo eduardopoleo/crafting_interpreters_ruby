@@ -63,5 +63,5 @@ While loop ensure that we can handle multiple occurances of the same time of sym
 
 TODO:
 - the expression vs statement. 
-- When does an expression takes token vs a string
-- assignment is recursive because it's a right-associative expression
+- expressions should never have tokens
+- consumes and match should burn the token

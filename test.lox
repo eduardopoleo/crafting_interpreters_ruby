@@ -5,14 +5,11 @@
   /*
 */
 
-var a = "global a";
-// a = "blah"
-
+var a = 1;
 {
-  a = "blah";
+  var a = a + 2;
+  print a;
 }
-
-print a;
 
 // var a = "global a";
 // var b = "global b";
