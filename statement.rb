@@ -64,4 +64,17 @@ class Statement
     end
   end
 
+  class While
+    attr_reader :condition, :body
+
+    def initialize(condition, body)
+      @condition = condition
+      @body = body
+    end
+
+    def accept(visitor)
+      visitor.visit_while(self)
+    end
+  end
+
 end

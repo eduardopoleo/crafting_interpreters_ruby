@@ -29,7 +29,8 @@ class AstGenerator
     'expression' => ['expression'],
     'if'         => ['condition', 'then_branch', 'else_branch'],
     'print'      => ['expression'],
-    'var'        => ['name', 'initializer']
+    'var'        => ['name', 'initializer'],
+    'while'      => ['condition', 'body']
   }
 
   def generate

@@ -6,11 +6,12 @@ require_relative './statement'
 # program         → statement* EOF ;
 # declaration     → var_declaration | statement 
 # var_declaration → "var" IDENTIFIER ( "=" expression )?;
-# statement       → exprStmt | ifStmt | printStmt | block ;
+# statement       → exprStmt | ifStmt | printStmt | while | block ;
 # if_statment     → "if" "(" expression ")" ("else" statement)? ;
 # printStmt       → "print" expression;
 # block           → "{" declaration "}"
 # exprStmt        → expression;
+# whileStm        → "while" "(" expression ")" statement
 
 # expression      → equality ;
 # assignment      → IDENTIFIER "=" assignment | logic_or;
@@ -79,6 +80,11 @@ class Parser
       return print_statement
     end
 
+    if match?(Token::Type::KEYWORDS['while'])
+      advance
+      return while_statement
+    end
+
     if match?(Token::Type::LEFT_BRACE)
       advance
       return Statement::Block.new(block)
@@ -110,6 +116,17 @@ class Parser
     # we consume the semi colon token.
     advance
     Statement::Print.new(value)
+  end
+
+  def while_statement
+    raise_error("expected ( at #{current}") unless match?(Token::Type::LEFT_PAREN)
+    advance
+    condition = expression
+    raise_error("expected ) at #{current}") unless match?(Token::Type::RIGHT_PAREN)
+
+    body = statement
+
+    Statement::While.new(condition, body)
   end
 
   def block

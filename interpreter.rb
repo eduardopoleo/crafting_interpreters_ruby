@@ -55,6 +55,13 @@ class Interpreter
     # both of these cases require checking on the right operand 
     return evaluate(exp.right)
   end
+
+  def visit_while(exp)
+    while evaluate(exp.condition)
+      evaluate(exp.body)
+    end
+    nil
+  end
   
   def visit_assign(exp)
     value = evaluate(exp.value)
