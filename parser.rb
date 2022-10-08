@@ -103,18 +103,20 @@ class Parser
   end
   
   def if_statement
-    raise_error("Expected ( at #{current}") unless match?(Token::TokenType::LEFT_PAREN)
+    raise_error("Expected ( at #{current}") unless match?(Token::Type::LEFT_PAREN)
     advance
     condition = expression
-    raise_error("Expected ( at #{current}") unless match?(Token::TokenType::RIGHT_PAREN)
+    raise_error("Expected ( at #{current}") unless match?(Token::Type::RIGHT_PAREN)
     advance
     then_branch = statement
-    else_brach = nil
-    if match?(Token::TokenType::KEYWORDS['else'])
-      else_branch = statement
+
+    other_branch = nil
+    if match?(Token::Type::KEYWORDS['else'])
+      advance
+      other_branch = statement
     end
 
-    Statement::If.new(condition, then_branch, else_brach)
+    Statement::If.new(condition, then_branch, other_branch)
   end
 
   def print_statement
@@ -131,8 +133,9 @@ class Parser
     raise_error("expected ( at #{current}") unless match?(Token::Type::LEFT_PAREN)
     advance
     condition = expression
-    raise_error("expected ) at #{current}") unless match?(Token::Type::RIGHT_PAREN)
 
+    raise_error("expected ) at #{current}") unless match?(Token::Type::RIGHT_PAREN)
+    advance
     body = statement
 
     Statement::While.new(condition, body)

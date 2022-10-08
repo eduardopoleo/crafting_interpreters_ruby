@@ -26,12 +26,12 @@ class Statement
   end
 
   class If
-    attr_reader :condition, :then_branch, :else_branch
+    attr_reader :condition, :then_branch, :other_branch
 
-    def initialize(condition, then_branch, else_branch)
+    def initialize(condition, then_branch, other_branch)
       @condition = condition
       @then_branch = then_branch
-      @else_branch = else_branch
+      @other_branch = other_branch
     end
 
     def accept(visitor)

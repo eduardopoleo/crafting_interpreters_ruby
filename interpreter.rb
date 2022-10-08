@@ -32,9 +32,9 @@ class Interpreter
   ### Visitor methods ###
   def visit_if(if_statement)
     if evaluate(if_statement.condition)
-      execute(if_statement.then_branch)
-    elsif if_statement.else_brach
-      execute(if_statement.else_brach)
+      evaluate(if_statement.then_branch)
+    elsif if_statement.other_branch
+      evaluate(if_statement.other_branch)
     end
     nil
   end
