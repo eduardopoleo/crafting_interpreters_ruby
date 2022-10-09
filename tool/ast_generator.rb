@@ -27,7 +27,7 @@ class AstGenerator
   AST_STATEMENTS = {
     'block'      => ['statements'],
     'expression' => ['expression'],
-    'if'         => ['condition', 'then_branch', 'else_branch'],
+    'if'         => ['condition', 'then_branch', 'other_branch'],
     'print'      => ['expression'],
     'var'        => ['name', 'initializer'],
     'while'      => ['condition', 'body']

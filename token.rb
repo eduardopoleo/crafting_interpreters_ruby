@@ -52,6 +52,7 @@ class Token
       "for"    => 'FOR',
       "fun"    => 'FUN',
       "if"     => 'IF',
+      'elif'   => 'ELIF',
       "nil"    => 'NIL',
       "or"     => 'OR',
       "print"  => 'PRINT',

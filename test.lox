@@ -9,21 +9,31 @@
 //   print i;
 // }
 
-for(var i = 0; i <= 100; i = i + 1) {
-  if (i % 3 == 0 and i % 5 == 0) {
-    print "FIZZBUZZ";
-  }
+// for(var i = 0; i <= 100; i = i + 1) {
+//   if (i % 3 == 0 and i % 5 == 0) {
+//     print "FIZZBUZZ";
+//   }
 
-  if (i % 3 == 0) {
-    print "FIZZ";
-  }
+//   if (i % 7 == 0 or i % 9 == 0) {
+//     print "FAKEORBUZZ";
+//   }
 
-  if (i % 5 == 0) {
-    print "BUZZ";
-  }
+//   if (i % 3 == 0) {
+//     print "FIZZ";
+//   }
 
-  print i;
-}
+//   if (i % 5 == 0) {
+//     print "BUZZ";
+//   }
+
+//   print i;
+// }
+if (false)
+  print "yeah2";
+else
+  print "nope";
+
+
 
 // var i = 1;
 // while(i <= 100) {

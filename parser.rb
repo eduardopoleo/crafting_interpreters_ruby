@@ -11,7 +11,7 @@ require_relative './statement'
 # statement       → exprStmt | ifStmt | printStmt | while | block ;
 # for_statment    → "for" "(" varDcl | expStm | ";" | expression? ";" | expression")" statement; 
 # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for
-# if_statment     → "if" "(" expression ")" ("else" statement)? ;
+# if_statement     → "if" "(" expression ")" ("elif" "(" expression ")" statement)*? ("else" statement)? ;
 # printStmt       → "print" expression;
 # block           → "{" declaration "}"
 # exprStmt        → expression;
@@ -110,12 +110,18 @@ class Parser
     advance
     then_branch = statement
 
+    # elif_statements = []
+    # while match?(Token::Type::KEYWORDS['elif'])
+    #   advance
+    #   elif_statements << statement
+    # end
+
+    # require 'pry'; binding.pry
     other_branch = nil
     if match?(Token::Type::KEYWORDS['else'])
       advance
       other_branch = statement
     end
-
     Statement::If.new(condition, then_branch, other_branch)
   end
 
