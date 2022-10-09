@@ -24,7 +24,7 @@ require_relative './statement'
 # equality        → comparison ( ( "!=" | "==" ) comparison )* ;
 # comparison      → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 # term            → factor ( ( "-" | "+" ) factor )* ;
-# factor          → unary ( ( "/" | "*" ) unary )* ;
+# factor          → unary ( ( "/" | "*" | "%" ) unary )* ;
 # unary           → ( "!" | "-" ) unary | primary ;
 # primary         → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER;
 
@@ -430,7 +430,8 @@ class Parser
 
     while match?([
       Token::Type::SLASH,
-      Token::Type::STAR
+      Token::Type::STAR,
+      Token::Type::MODULO
     ]) do
       operator = peek
       advance

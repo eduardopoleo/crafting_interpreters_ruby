@@ -111,6 +111,8 @@ class Interpreter
       left / right
     when Token::Type::STAR
       left * right
+    when Token::Type::MODULO
+      left % right
     when Token::Type::PLUS
       raise RuntimeError.new(
         exp.operator,

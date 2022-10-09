@@ -24,7 +24,8 @@ class Token
     PLUS = '+'
     SEMICOLON = ';'
     SLASH ='/'
-    STAR ='*'
+    STAR = '*'
+    MODULO = '%'
     EOF = 'EOF'
   
     #  One or two character tokens.

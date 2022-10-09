@@ -10,14 +10,18 @@
 // }
 
 for(var i = 0; i <= 100; i = i + 1) {
-  if (i / 5 == 1) {
-    print "Divisible by 5";
+  // if (i % 3 == 0 and i % 5 == 0) {
+  //   print "FIZZBUZZ"
+  // }
+
+  if (i % 3 == 0) {
+    print "FIZZ";
   }
 
-  if (i / 3 == 1) {
-    print "Divisible by 3";
+  if (i % 5 == 0) {
+    print "BUZZ";
   }
-  
+
   print i;
 }
 

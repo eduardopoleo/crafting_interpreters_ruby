@@ -48,6 +48,8 @@ class Scanner
        add_token(Token::Type::SEMICOLON)
     when '*'
        add_token(Token::Type::STAR);
+    when '%'
+       add_token(Token::Type::MODULO);
     when '!'
       # these are a bit more complicated because we need to look ahead 1 space 
       # to where the pointer is to decide what kid of token it should be
