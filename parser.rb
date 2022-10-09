@@ -286,8 +286,8 @@ class Parser
     while(match?(Token::Type::KEYWORDS['or']))
       operator = peek
       advance
-      rigth = and_exp
-      exp = Expression::Logical(exp, operator, right)
+      right = and_exp
+      exp = Expression::Logical.new(exp, operator, right)
     end
 
     exp
@@ -299,8 +299,8 @@ class Parser
     while(match?(Token::Type::KEYWORDS['and']))
       operator = peek
       advance
-      rigth = equality
-      exp = Expression::Logical(exp, operator, right)
+      right = equality
+      exp = Expression::Logical.new(exp, operator, right)
     end
 
     exp

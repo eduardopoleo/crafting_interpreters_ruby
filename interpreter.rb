@@ -42,7 +42,7 @@ class Interpreter
   def visit_logical(exp)
     left = evaluate(exp.left)
 
-    if exp.operator.type == Token::TokenType::KEYWORDS['or']
+    if exp.operator.type == Token::Type::KEYWORDS['or']
       # return "true" if it's an or the first operand is true
       return left if left
     else
