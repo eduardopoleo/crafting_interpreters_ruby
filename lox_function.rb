@@ -1,6 +1,6 @@
 require_relative './environment'
 
-class LoxFunction
+class LoxFunction < LoxCallable
   attr_reader :declaration
 
   def initialize(declaration)

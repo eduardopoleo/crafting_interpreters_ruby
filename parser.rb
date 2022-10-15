@@ -494,7 +494,6 @@ class Parser
   MAX_NUMBER_OF_ARGUMENTS = 255
   def call
     exp = primary
-
     # this is the same deal as the other expressions.
     # this while loop allows us to target ALL funtion calls in the expression
     while match!(Token::Type::LEFT_PAREN)
@@ -511,7 +510,7 @@ class Parser
       # Current token contains the closing param
       exp = Expression::Call.new(exp, previous, arguments)
     end
-
+# require 'pry'; binding.pry
     exp
   end
 
@@ -533,10 +532,8 @@ class Parser
       return Expression::Literal.new(false)
     end
 
-    if match?(Token::Type::IDENTIFIER)
-      exp = Expression::Variable.new(peek)
-      advance
-      return exp
+    if match!(Token::Type::IDENTIFIER)
+      return Expression::Variable.new(previous)
     end
 
     if match!(Token::Type::KEYWORDS['nil'])

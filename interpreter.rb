@@ -66,7 +66,8 @@ class Interpreter
     arguments = []
     call_exp.arguments.each { |arg| arguments << evaluate(arg) }
 
-    if !callee.is_a?(LoxFunction)
+# require 'pry'; binding.pry
+    if !callee.is_a?(LoxCallable)
       raise RuntimeError.new(call_exp.paren, "Can only call functions and classes.")
     end
 
@@ -75,7 +76,6 @@ class Interpreter
         "Expected #{callee.arity} arguments but got #{call_exp.arguments.size}."
       )
     end
-    
     # coerces callee into a loxcallabe with a call method but
     # I have to do something else in here
     # LoxCallable function = (LoxCallable)callee;
