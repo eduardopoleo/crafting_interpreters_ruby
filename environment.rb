@@ -33,7 +33,7 @@ class Environment
     )
   end
 
-  def define(name, value)
+  def assign(name, value)
     return values[name] = value if values.has_key?(name)
 
     return enclosing.define(name, value) if !enclosing.nil?

@@ -9,19 +9,25 @@
 //   print i;
 // }
 
-for(var i = 0; i <= 100; i = i + 1) {
-  if (i % 3 == 0 and i % 5 == 0) {
-    print "FIZZBUZZ";
-  } elif (i % 3 == 0) {
-    print "FIZZ";
-  } elif (i % 5 == 0) {
-    print "BUZZ";
-  } else {
-    print "nothing to print";
-  }
-
-  print i;
+fun sayHi(first, last) {
+  print "Hi, " + first + " " + last + "!";
 }
+
+sayHi("Dear", "Reader");
+
+// for(var i = 0; i <= 100; i = i + 1) {
+//   if (i % 3 == 0 and i % 5 == 0) {
+//     print "FIZZBUZZ";
+//   } elif (i % 3 == 0) {
+//     print "FIZZ";
+//   } elif (i % 5 == 0) {
+//     print "BUZZ";
+//   } else {
+//     print "nothing to print";
+//   }
+
+//   print i;
+// }
 
 
 // var i = 1;

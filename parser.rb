@@ -8,7 +8,7 @@ require_relative './statement'
 # declaration     → fucDecl | var_declaration | statement 
 # fucDecl         → "fun" function;
 # function        → IDENTIFIER "(" parameters? ")" block;
-# parameters      → IDENTIFER ("," IDENTIFIER)*;
+# parameters      → IDENTIFIER ("," IDENTIFIER)*;
 # var_declaration → "var" IDENTIFIER ( "=" expression )?;
 # statement       → exprStmt | ifStmt | printStmt | while | block ;
 
@@ -76,10 +76,9 @@ class Parser
   end
 
   def fun_declaration(kind)
-    name = consume!(Token::Type::IDENTIFER, "Expect #{kind} name.")
+    name = consume!(Token::Type::IDENTIFIER, "Expect #{kind} name.")
     consume!(Token::Type::LEFT_PAREN, "Expect, '( after #{kind} name.")
     parameters = []
-    
     # This is not a while loop cuz... you wouldn't expect finding
     # the same st
     if !check(Token::Type::RIGHT_PAREN)
@@ -87,7 +86,7 @@ class Parser
         if parameters.size >= 255
           raise_error("Can't have more than 255 paramenters")
         end
-        parameters.add(consume!(Token::Type::IDENTIFER, "Expect parameters name."))
+        parameters << consume!(Token::Type::IDENTIFIER, "Expect parameters name.")
       end while match!(Token::Type::COMMA)
     end
 
@@ -508,7 +507,7 @@ class Parser
         end while(match!(Token::Type::COMMA))
       end
 
-      consume!(Token::Type::RIGHT_PAREN)
+      consume!(Token::Type::RIGHT_PAREN, "Expected ) at #{current}")
       # Current token contains the closing param
       exp = Expression::Call.new(exp, previous, arguments)
     end
@@ -540,18 +539,13 @@ class Parser
       return exp
     end
 
-    if match?(Token::Type::KEYWORDS['nil'])
-      advance
+    if match!(Token::Type::KEYWORDS['nil'])
       return Expression::Literal.new(nil) 
     end
 
-    if match?(Token::Type::LEFT_PAREN)
-      advance
+    if match!(Token::Type::LEFT_PAREN)
       exp = expression
-
-      raise_error("expected ) at #{current}") unless match?(Token::Type::RIGHT_PAREN)
-        
-      advance
+      consume!(Token::Type::RIGHT_PAREN, "expected ) at #{current}")
       return Expression::Grouping.new(exp)
     end
 
@@ -571,6 +565,20 @@ class Parser
     false
   end
 
+  def match!(types)
+    return false if at_end?
+
+    types = Array(types)
+
+    types.each do |type|
+      if peek.type == type
+        advance; return true
+      end
+    end
+    
+    false
+  end
+
   def check(types)
     types = Array(types)
 
@@ -581,18 +589,8 @@ class Parser
     false
   end
 
-  def match!(types)
-    types = Array(types)
-
-    types.each do |type|
-      advance; return true if peek.type == type
-    end
-    
-    false
-  end
-
   def consume!(type, error)
-    raise_error("expected ) at #{current}") unless match!(type)
+    raise_error("expected #{type} at #{current}") unless match!(type)
 
     previous
   end

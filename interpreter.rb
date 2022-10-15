@@ -81,7 +81,7 @@ class Interpreter
     # LoxCallable function = (LoxCallable)callee;
     # there's a missing step in here callee at this point is just an identifer
     # with the name of the function
-    return callee.call(this, arguments);
+    return callee.call(self, arguments);
   end
 
   def visit_logical(exp)
@@ -110,7 +110,7 @@ class Interpreter
   
   def visit_assign(exp)
     value = evaluate(exp.value)
-    environment.define(exp.name.lexeme, value)
+    environment.assign(exp.name.lexeme, value)
     value
   end
 
@@ -138,11 +138,8 @@ class Interpreter
     previous_environment = environment
 
     begin
-      @environment = new_environment
-
-      block_statement.statements.each do |statement|
-        evaluate(statement)
-      end
+      @environment = environment
+      statements.each { |statement| evaluate(statement) }
     ensure
       @environment = previous_environment
     end
