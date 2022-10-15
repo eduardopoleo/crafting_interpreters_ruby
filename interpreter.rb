@@ -1,7 +1,13 @@
 require_relative './environment'
+require_relative './native_functions'
+require_relative './lox_function'
 
 class Interpreter
   attr_reader :environment, :statements
+  include NativeFunctions
+
+  # might need to change to a @@ but we'll see
+  @globals = Environment.new
 
   class RuntimeError < StandardError
     attr_reader :token
@@ -13,12 +19,14 @@ class Interpreter
   end
 
   def self.interpret(statements)
-   new(statements).interpret
+    new(statements).interpret
   end
 
   def initialize(statements)
     @statements = statements
     @environment = Environment.new
+    # Add native functions to the environment
+    environment.define("clock", clock)
   end
 
   def interpret
@@ -33,10 +41,47 @@ class Interpreter
   def visit_if(if_statement)
     if evaluate(if_statement.condition)
       evaluate(if_statement.then_branch)
-    elsif if_statement.other_branch
+      return
+    end
+
+    if_statement.elif_statements.each do |elif_statement|
+      if evaluate(elif_statement.condition)
+        evaluate(elif_statement.branch)
+        return
+      end
+    end
+
+    if if_statement.other_branch
       evaluate(if_statement.other_branch)
     end
+
     nil
+  end
+
+  def visit_call(call_exp)
+    # will return a function object in the near future
+    # I think I just need to define the global functions in here
+    # and then find them 
+    callee = evaluate(call_exp.callee)
+    arguments = []
+    call_exp.arguments.each { |arg| arguments << evaluate(arg) }
+
+    if !callee.is_a?(LoxCallable)
+      raise RuntimeError.new(call_exp.paren, "Can only call functions and classes.")
+    end
+
+    if call_exp.arguments.size != callee.arity
+      raise RuntimeError.new(call_exp.paren,
+        "Expected #{callee.arity} arguments but got #{call_exp.arguments.size}."
+      )
+    end
+    
+    # coerces callee into a loxcallabe with a call method but
+    # I have to do something else in here
+    # LoxCallable function = (LoxCallable)callee;
+    # there's a missing step in here callee at this point is just an identifer
+    # with the name of the function
+    return function.call(this, arguments);
   end
 
   def visit_logical(exp)
@@ -65,13 +110,18 @@ class Interpreter
   
   def visit_assign(exp)
     value = evaluate(exp.value)
-    environment.assign(exp.name.lexeme, value)
+    environment.define(exp.name.lexeme, value)
     value
   end
 
   def visit_expression(expression_statement)
     evaluate(expression_statement.expression)
     nil
+  end
+
+  def visit_function(function_statement)
+    function = LoxFunction.new(function_statement)
+    environment.define(function_statement.name.lexeme, function)
   end
 
   def visit_print(print_statement)
@@ -81,7 +131,10 @@ class Interpreter
   end
 
   def visit_block(block_statement)
-    new_environment = Environment.new(environment)
+    execute_block(block_statement.statements, Environment.new(environment))
+  end
+
+  def execute_block(statements, environment)
     previous_environment = environment
 
     begin

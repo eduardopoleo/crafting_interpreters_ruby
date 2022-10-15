@@ -33,10 +33,10 @@ class Environment
     )
   end
 
-  def assign(name, value)
+  def define(name, value)
     return values[name] = value if values.has_key?(name)
 
-    return enclosing.assign(name, value) if !enclosing.nil?
+    return enclosing.define(name, value) if !enclosing.nil?
 
     raise RuntimeError.new(
       name,

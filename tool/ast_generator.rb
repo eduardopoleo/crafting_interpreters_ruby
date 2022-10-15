@@ -17,6 +17,7 @@ class AstGenerator
   AST_ATTRIBUTES = {
     'assign'      => ['name', 'value'],
     'binary'      => ['left', 'operator', 'right'],
+    'call'        => ['callee', 'paren', 'arguments'],
     'grouping'    => ['expression'],
     'literal'     => ['value'],
     'logical'     => ['left', 'operator', 'right'],
@@ -27,7 +28,9 @@ class AstGenerator
   AST_STATEMENTS = {
     'block'      => ['statements'],
     'expression' => ['expression'],
-    'if'         => ['condition', 'then_branch', 'other_branch'],
+    'Function'   => ['name', 'params', 'body'],
+    'if'         => ['condition', 'then_branch', 'elif_statements', 'other_branch'],
+    'elif'       => ['condition', 'branch'],
     'print'      => ['expression'],
     'var'        => ['name', 'initializer'],
     'while'      => ['condition', 'body']

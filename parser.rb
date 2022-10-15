@@ -5,12 +5,14 @@ require_relative './statement'
 
 # program         → statement* EOF ;
 
-# declaration     → var_declaration | statement 
+# declaration     → fucDecl | var_declaration | statement 
+# fucDecl         → "fun" function;
+# function        → IDENTIFIER "(" parameters? ")" block;
+# parameters      → IDENTIFER ("," IDENTIFIER)*;
 # var_declaration → "var" IDENTIFIER ( "=" expression )?;
-
 # statement       → exprStmt | ifStmt | printStmt | while | block ;
+
 # for_statment    → "for" "(" varDcl | expStm | ";" | expression? ";" | expression")" statement; 
-# https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for
 # if_statement     → "if" "(" expression ")" ("elif" "(" expression ")" statement)*? ("else" statement)? ;
 # printStmt       → "print" expression;
 # block           → "{" declaration "}"
@@ -26,6 +28,8 @@ require_relative './statement'
 # term            → factor ( ( "-" | "+" ) factor )* ;
 # factor          → unary ( ( "/" | "*" | "%" ) unary )* ;
 # unary           → ( "!" | "-" ) unary | primary ;
+# call            → primary ( "(" arguments? ")")*
+# arguments       → expression ( "," expression)*;
 # primary         → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER;
 
 # convers a "dumb" list sequential tokens into expressions
@@ -65,12 +69,32 @@ class Parser
   end
 
   def declaration
-    if match?(Token::Type::KEYWORDS['var'])
-      advance
-      return var_declaration
-    end
+    return fun_declaration("function") if match!(Token::Type::KEYWORDS['fun'])
+    return var_declaration if match!(Token::Type::KEYWORDS['var'])
   
     statement
+  end
+
+  def fun_declaration(kind)
+    name = consume!(Token::Type::IDENTIFER, "Expect #{kind} name.")
+    consume!(Token::Type::LEFT_PAREN, "Expect, '( after #{kind} name.")
+    parameters = []
+    
+    # This is not a while loop cuz... you wouldn't expect finding
+    # the same st
+    if !check(Token::Type::RIGHT_PAREN)
+      begin
+        if parameters.size >= 255
+          raise_error("Can't have more than 255 paramenters")
+        end
+        parameters.add(consume!(Token::Type::IDENTIFER, "Expect parameters name."))
+      end while match!(Token::Type::COMMA)
+    end
+
+    consume!(Token::Type::RIGHT_PAREN, "Expect ') after parameters")
+    consume!(Token::Type::LEFT_BRACE, "Expect '{' before #{kind} body")
+    body = block
+    Statement::Function.new(name, parameters, body)
   end
 
   def statement
@@ -110,19 +134,24 @@ class Parser
     advance
     then_branch = statement
 
-    # elif_statements = []
-    # while match?(Token::Type::KEYWORDS['elif'])
-    #   advance
-    #   elif_statements << statement
-    # end
+    elif_statements = []
+    while match?(Token::Type::KEYWORDS['elif'])
+      advance
+      raise_error("Expected ( at #{peek.line}") unless match?(Token::Type::LEFT_PAREN)
+      advance
+      elif_condition = expression
+      raise_error("Expected ) at #{peek.line}") unless match?(Token::Type::RIGHT_PAREN)
+      advance
+      elif_branch = statement
+      elif_statements << Statement::Elif.new(elif_condition, elif_branch)
+    end
 
-    # require 'pry'; binding.pry
     other_branch = nil
     if match?(Token::Type::KEYWORDS['else'])
       advance
       other_branch = statement
     end
-    Statement::If.new(condition, then_branch, other_branch)
+    Statement::If.new(condition, then_branch, elif_statements, other_branch)
   end
 
   def print_statement
@@ -458,7 +487,33 @@ class Parser
       return Expression::Unary.new(operator, right)
     end
 
-    primary
+    call
+  end
+
+  # Same as other type of expressions we need to recurse to be able to catch all
+  # function calls
+  MAX_NUMBER_OF_ARGUMENTS = 255
+  def call
+    exp = primary
+
+    # this is the same deal as the other expressions.
+    # this while loop allows us to target ALL funtion calls in the expression
+    while match!(Token::Type::LEFT_PAREN)
+      arguments = []
+      if !check(Token::Type::RIGHT_PAREN)
+        # Iterate until you run out of commas the first loop does not require a comma.
+        begin
+          raise_error("Too many arguments at #{current}") if arguments.size >= MAX_NUMBER_OF_ARGUMENTS
+          arguments << expression
+        end while(match!(Token::Type::COMMA))
+      end
+
+      consume!(Token::Type::RIGHT_PAREN)
+      # Current token contains the closing param
+      exp = Expression::Call.new(exp, previous, arguments)
+    end
+
+    exp
   end
 
   # primary → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" ;
@@ -503,6 +558,7 @@ class Parser
     raise_error('Expected expression')
   end
 
+  ### utility methods ###
   def match?(types)
 
     return false if at_end?
@@ -513,6 +569,36 @@ class Parser
     end
 
     false
+  end
+
+  def check(types)
+    types = Array(types)
+
+    types.each do |type|
+      return true if peek.type == type
+    end
+    
+    false
+  end
+
+  def match!(types)
+    types = Array(types)
+
+    types.each do |type|
+      advance; return true if peek.type == type
+    end
+    
+    false
+  end
+
+  def consume!(type, error)
+    raise_error("expected ) at #{current}") unless match!(type)
+
+    previous
+  end
+
+  def previous
+    tokens[current - 1]
   end
 
   def raise_error(message)

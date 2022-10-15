@@ -25,17 +25,45 @@ class Statement
     end
   end
 
-  class If
-    attr_reader :condition, :then_branch, :other_branch
+  class Function
+    attr_reader :name, :params, :body
 
-    def initialize(condition, then_branch, other_branch)
+    def initialize(name, params, body)
+      @name = name
+      @params = params
+      @body = body
+    end
+
+    def accept(visitor)
+      visitor.visit_Function(self)
+    end
+  end
+
+  class If
+    attr_reader :condition, :then_branch, :elif_statements, :other_branch
+
+    def initialize(condition, then_branch, elif_statements, other_branch)
       @condition = condition
       @then_branch = then_branch
+      @elif_statements = elif_statements
       @other_branch = other_branch
     end
 
     def accept(visitor)
       visitor.visit_if(self)
+    end
+  end
+
+  class Elif
+    attr_reader :condition, :branch
+
+    def initialize(condition, branch)
+      @condition = condition
+      @branch = branch
+    end
+
+    def accept(visitor)
+      visitor.visit_elif(self)
     end
   end
 

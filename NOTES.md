@@ -62,6 +62,12 @@ Each production must reference the production immdiately higher
 While loop ensure that we can handle multiple occurances of the same time of symbol
 
 TODO:
-- the expression vs statement. 
+- the expression vs statement.
+  - Statements can't be evaluated directly
+  - You can't compose statements within each other (except for)
+  blocks
+  - Expressions compose into one another
+  - thus expressions for the most part use while loops and statments don't
 - expressions should never have tokens
 - consumes and match should burn the token
+- Why is unary the only expression that isn't recursive?

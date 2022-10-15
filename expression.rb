@@ -28,6 +28,20 @@ class Expression
     end
   end
 
+  class Call
+    attr_reader :callee, :paren, :arguments
+
+    def initialize(callee, paren, arguments)
+      @callee = callee
+      @paren = paren
+      @arguments = arguments
+    end
+
+    def accept(visitor)
+      visitor.visit_call(self)
+    end
+  end
+
   class Grouping
     attr_reader :expression
 

@@ -9,30 +9,19 @@
 //   print i;
 // }
 
-// for(var i = 0; i <= 100; i = i + 1) {
-//   if (i % 3 == 0 and i % 5 == 0) {
-//     print "FIZZBUZZ";
-//   }
+for(var i = 0; i <= 100; i = i + 1) {
+  if (i % 3 == 0 and i % 5 == 0) {
+    print "FIZZBUZZ";
+  } elif (i % 3 == 0) {
+    print "FIZZ";
+  } elif (i % 5 == 0) {
+    print "BUZZ";
+  } else {
+    print "nothing to print";
+  }
 
-//   if (i % 7 == 0 or i % 9 == 0) {
-//     print "FAKEORBUZZ";
-//   }
-
-//   if (i % 3 == 0) {
-//     print "FIZZ";
-//   }
-
-//   if (i % 5 == 0) {
-//     print "BUZZ";
-//   }
-
-//   print i;
-// }
-if (false)
-  print "yeah2";
-else
-  print "nope";
-
+  print i;
+}
 
 
 // var i = 1;
