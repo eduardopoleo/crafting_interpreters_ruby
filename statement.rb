@@ -79,6 +79,19 @@ class Statement
     end
   end
 
+  class Return
+    attr_reader :keywork, :value
+
+    def initialize(keywork, value)
+      @keywork = keywork
+      @value = value
+    end
+
+    def accept(visitor)
+      visitor.visit_return(self)
+    end
+  end
+
   class Var
     attr_reader :name, :initializer
 

@@ -18,6 +18,14 @@ class Interpreter
     end
   end
 
+  class FunctionReturnException < StandardError
+    attr_reader :value
+  
+    def initialize(value)
+      @value = value
+    end
+  end
+
   def self.interpret(statements)
     new(statements).interpret
   end
@@ -66,7 +74,6 @@ class Interpreter
     arguments = []
     call_exp.arguments.each { |arg| arguments << evaluate(arg) }
 
-# require 'pry'; binding.pry
     if !callee.is_a?(LoxCallable)
       raise RuntimeError.new(call_exp.paren, "Can only call functions and classes.")
     end
@@ -128,6 +135,15 @@ class Interpreter
     value = evaluate(print_statement.expression)
     puts value
     nil
+  end
+
+  def visit_return(return_statement)
+    value = nil
+    if return_statement.value.nil?
+      value = evaluate(return_statement.value)
+    end
+
+    raise FunctionReturnException.new(value)
   end
 
   def visit_block(block_statement)

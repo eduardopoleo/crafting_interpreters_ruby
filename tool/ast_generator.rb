@@ -28,10 +28,11 @@ class AstGenerator
   AST_STATEMENTS = {
     'block'      => ['statements'],
     'expression' => ['expression'],
-    'Function'   => ['name', 'params', 'body'],
+    'function'   => ['name', 'params', 'body'],
     'if'         => ['condition', 'then_branch', 'elif_statements', 'other_branch'],
     'elif'       => ['condition', 'branch'],
     'print'      => ['expression'],
+    'return'     => ['keywork', 'value'],
     'var'        => ['name', 'initializer'],
     'while'      => ['condition', 'body']
   }

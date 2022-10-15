@@ -1,4 +1,5 @@
 require_relative './environment'
+require_relative './interpreter'
 
 class LoxFunction < LoxCallable
   attr_reader :declaration
@@ -18,7 +19,11 @@ class LoxFunction < LoxCallable
       environment.define(declaration.params[i].lexeme, arguments[i])
     end
 
-    interpreter.execute_block(declaration.body, environment)
+    begin
+      interpreter.execute_block(declaration.body, environment)
+    rescue FunctionReturnException => result
+      return result.value
+    end
   end
 
   def to_s

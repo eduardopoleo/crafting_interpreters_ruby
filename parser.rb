@@ -10,8 +10,9 @@ require_relative './statement'
 # function        → IDENTIFIER "(" parameters? ")" block;
 # parameters      → IDENTIFIER ("," IDENTIFIER)*;
 # var_declaration → "var" IDENTIFIER ( "=" expression )?;
-# statement       → exprStmt | ifStmt | printStmt | while | block ;
+# statement       → exprStmt | ifStmt | printStmt | returnStmt | while | block ;
 
+# returnStmt      → "return" expresion?;
 # for_statment    → "for" "(" varDcl | expStm | ";" | expression? ";" | expression")" statement; 
 # if_statement     → "if" "(" expression ")" ("elif" "(" expression ")" statement)*? ("else" statement)? ;
 # printStmt       → "print" expression;
@@ -107,6 +108,10 @@ class Parser
       return print_statement
     end
 
+    if match!(Token::Type::KEYWORDS['return'])
+      return return_statement
+    end
+
     if match?(Token::Type::KEYWORDS['while'])
       advance
       return while_statement
@@ -161,6 +166,19 @@ class Parser
     # we consume the semi colon token.
     advance
     Statement::Print.new(value)
+  end
+
+  def return_statement
+    keyword = previous
+
+    value = nil
+    if !check(Token::Type::SEMICOLON)
+      value = expression
+    end
+
+    consume!(Token::Type::SEMICOLON, "Expected ; at #{current}")
+
+    Statement::Return.new(keyword, value)
   end
 
   def while_statement
