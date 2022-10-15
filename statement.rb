@@ -35,7 +35,7 @@ class Statement
     end
 
     def accept(visitor)
-      visitor.visit_Function(self)
+      visitor.visit_function(self)
     end
   end
 

@@ -66,7 +66,7 @@ class Interpreter
     arguments = []
     call_exp.arguments.each { |arg| arguments << evaluate(arg) }
 
-    if !callee.is_a?(LoxCallable)
+    if !callee.is_a?(LoxFunction)
       raise RuntimeError.new(call_exp.paren, "Can only call functions and classes.")
     end
 
@@ -81,7 +81,7 @@ class Interpreter
     # LoxCallable function = (LoxCallable)callee;
     # there's a missing step in here callee at this point is just an identifer
     # with the name of the function
-    return function.call(this, arguments);
+    return callee.call(this, arguments);
   end
 
   def visit_logical(exp)
@@ -226,7 +226,6 @@ class Interpreter
     environment.get(expression.name.lexeme)
   end
 
-  # def execute is equivalent to this 
   def evaluate(statement)
     statement.accept(self)
   end
