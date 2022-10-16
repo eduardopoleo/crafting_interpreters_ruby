@@ -29,7 +29,7 @@ class Environment
 
     raise RuntimeError.new(
       name,
-      "Variable not defined"
+      "Variable #{name} not defined"
     )
   end
 
@@ -40,7 +40,7 @@ class Environment
 
     raise RuntimeError.new(
       name,
-      "Variable not defined"
+      "Variable #{name} not defined"
     )
   end
 end

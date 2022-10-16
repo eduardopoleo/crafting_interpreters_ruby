@@ -3,11 +3,8 @@ require_relative './native_functions'
 require_relative './lox_function'
 
 class Interpreter
-  attr_reader :environment, :statements
+  attr_reader :environment, :statements, :globals
   include NativeFunctions
-
-  # might need to change to a @@ but we'll see
-  @globals = Environment.new
 
   class RuntimeError < StandardError
     attr_reader :token
@@ -33,8 +30,10 @@ class Interpreter
   def initialize(statements)
     @statements = statements
     @environment = Environment.new
+
     # Add native functions to the environment
-    environment.define("clock", clock)
+    @environment.define("clock", clock)
+    @globals = @environment
   end
 
   def interpret
@@ -67,9 +66,6 @@ class Interpreter
   end
 
   def visit_call(call_exp)
-    # will return a function object in the near future
-    # I think I just need to define the global functions in here
-    # and then find them 
     callee = evaluate(call_exp.callee)
     arguments = []
     call_exp.arguments.each { |arg| arguments << evaluate(arg) }
@@ -83,11 +79,6 @@ class Interpreter
         "Expected #{callee.arity} arguments but got #{call_exp.arguments.size}."
       )
     end
-    # coerces callee into a loxcallabe with a call method but
-    # I have to do something else in here
-    # LoxCallable function = (LoxCallable)callee;
-    # there's a missing step in here callee at this point is just an identifer
-    # with the name of the function
     return callee.call(self, arguments);
   end
 
@@ -139,7 +130,7 @@ class Interpreter
 
   def visit_return(return_statement)
     value = nil
-    if return_statement.value.nil?
+    if !return_statement.value.nil?
       value = evaluate(return_statement.value)
     end
 
@@ -151,8 +142,27 @@ class Interpreter
   end
 
   def execute_block(statements, environment)
-    previous_environment = environment
+    # the interpreter is the evaluator. Eveything gets evaluated based on the
+    # environment of the interpreter. This env gets resetted every time right
+    # before a function call. After the function / block is executed we restore
+    # back the env
+    #
+    # fun functionA(a) {
+    #   print a;
+    # }
 
+    # fun functionB(n) {
+    #   functionA(4);
+    #   print n;
+    # }
+
+    # functionB(2);
+
+    # call functionB   => GlobEnv -> EnvB
+    # call functionA   => EnvB -> EnvA
+    # finish functionA => EnvA -> EnvB
+    # finish functionB => EnvB -> GlobEnv
+    previous_environment = @environment
     begin
       @environment = environment
       statements.each { |statement| evaluate(statement) }

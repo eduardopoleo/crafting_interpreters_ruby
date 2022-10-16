@@ -13,15 +13,14 @@ class LoxFunction < LoxCallable
   end
 
   def call(interpreter, arguments)
-    environment = Environment.new(interpreter.environment)
-
+    environment = Environment.new(interpreter.globals)
     for i in 0...declaration.params.size
       environment.define(declaration.params[i].lexeme, arguments[i])
     end
 
     begin
       interpreter.execute_block(declaration.body, environment)
-    rescue FunctionReturnException => result
+    rescue Interpreter::FunctionReturnException => result
       return result.value
     end
   end
