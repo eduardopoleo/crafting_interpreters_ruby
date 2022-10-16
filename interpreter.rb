@@ -118,7 +118,10 @@ class Interpreter
   end
 
   def visit_function(function_statement)
-    function = LoxFunction.new(function_statement)
+    # This creates a nested "chain" of enviroments
+    # given that env.get searches the enclosing env this ensures that
+    # if a value was defined in the enclosing envs it will be read
+    function = LoxFunction.new(function_statement, environment)
     environment.define(function_statement.name.lexeme, function)
   end
 
@@ -141,7 +144,7 @@ class Interpreter
     execute_block(block_statement.statements, Environment.new(environment))
   end
 
-  def execute_block(statements, environment)
+  def execute_block(statements, block_environment)
     # the interpreter is the evaluator. Eveything gets evaluated based on the
     # environment of the interpreter. This env gets resetted every time right
     # before a function call. After the function / block is executed we restore
@@ -164,7 +167,7 @@ class Interpreter
     # finish functionB => EnvB -> GlobEnv
     previous_environment = @environment
     begin
-      @environment = environment
+      @environment = block_environment
       statements.each { |statement| evaluate(statement) }
     ensure
       @environment = previous_environment

@@ -2,10 +2,11 @@ require_relative './environment'
 require_relative './interpreter'
 
 class LoxFunction < LoxCallable
-  attr_reader :declaration
+  attr_reader :declaration, :closure
 
-  def initialize(declaration)
+  def initialize(declaration, closure)
     @declaration = declaration
+    @closure = closure
   end
 
   def arity
@@ -13,7 +14,7 @@ class LoxFunction < LoxCallable
   end
 
   def call(interpreter, arguments)
-    environment = Environment.new(interpreter.globals)
+    environment = Environment.new(closure)
     for i in 0...declaration.params.size
       environment.define(declaration.params[i].lexeme, arguments[i])
     end
