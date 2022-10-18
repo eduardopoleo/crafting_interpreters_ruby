@@ -1,0 +1,167 @@
+class Resolver
+  attr_reader :interpreter, :scopes
+
+  def initialize(interpreter)
+    @interpreter = interpreter
+    @scopes = []
+  end
+
+  def visit_block(block)
+    begin_scope
+    resolve(block.statements)
+    end_scope
+    return nil
+  end
+
+  def visit_var(var)
+    declare(var.name)
+    if var.initializer != nil
+      resolve(var.initializer)
+    end
+
+    define(var.name)
+    return nil
+  end
+
+  def visit_variable(var_exp)
+    # It's not trivial to see but this means that you have something like var a = a;
+    # - var gets resolved on visit_var
+    # - inside the above loop a gets resolved in here
+    # - cuz scopes[-1][var_exp.name.lexeme] == false we know that define has not been called
+    if !scopes.empty? && scopes[-1][var_exp.name.lexeme] == false
+      raise "Can't read local variable in its own initializer"
+    end
+
+    resolve_local(var_exp, var_exp.name)
+    return nil
+  end
+
+  def visit_assign(exp)
+    resolve(exp.value)
+    resolve_local(exp, exp.name)
+    return nil
+  end
+
+  def visit_function(function)
+    declare(function.name)
+    define(function.name)
+
+    resolve_function(function)
+    return nil
+  end
+
+  def visit_expression(expression_statement)
+    resolve(expression_statement.expression)
+    return nil
+  end
+
+  def visit_if(if_statement)
+    resolve(if_statement.condition)
+    resolve(if_statement.then_branch)
+    if_statement.elif_statements.each do |stm| resolve(stm)
+      resolve(stm.condition)
+      resolve(stm.branch)
+    end
+    resolve(if_statement.other_branch) if !if_statement.other_branch.nil?
+    return nil
+  end
+    
+  def visit_print(print_statement)
+    resolve(print_statement.expression)
+    return nil
+  end
+
+  def visit_return(return_statement)
+    if return_statement.value != nil
+      resolve(return_statement.value)
+    end
+
+    return nil
+  end
+
+  def visit_while(while_statement)
+    resolve(while_statement.condition)
+    resolve(while_statement.body)
+    return nil
+  end
+
+  def visit_binary(binary)
+    resolve(binary.left)
+    resolve(binary.right)
+    return nil
+  end
+
+  def visit_call(call)
+    resolve(call.callee)
+
+    call.arguments.each do |arg|
+      resolve(arg)
+    end
+
+    return nil
+  end
+
+  def visit_grouping(grouping)
+    resolve(grouping.expression)
+    return nil
+  end
+
+  def visit_literal(literal)
+    return nil
+  end
+
+  def visit_logical(logical)
+    resolve(logical.left)
+    resolve(logical.right)
+    return nil
+  end
+
+  def visit_unary(unary)
+    resolve(unary.right)
+    return nil
+  end
+
+  private
+
+  def declare(name)
+    return if scopes.empty?
+    scopes[-1][name.lexeme] = false    
+  end
+
+  def define(name)
+    return if scopes.empty?
+    scopes[-1][name.lexeme] = true
+  end
+
+  def begin_scope
+    scopes << {}
+  end
+
+  def end_scope
+    scopes.pop
+  end
+
+  def resolve(stms_or_exps)
+    stms_or_exps.each do |stm_or_exp|
+      stm_or_exp.accept(self)
+    end
+  end
+
+  def resolve_local(exp, name)
+    (scopes.size - 1).downto(0) do |i|
+      if scopes[i].has_key?(name.lexeme)
+        interpret.resolve(exp, scopes.size - 1 - i)
+      end
+    end
+  end
+
+  def resolve_function(function)
+    begin_scope
+    function.params.each do |param|
+      declare(param)
+      define(param)
+    end
+    resolve(function.body)
+    end_scope
+  end
+end

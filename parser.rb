@@ -528,7 +528,6 @@ class Parser
       # Current token contains the closing param
       exp = Expression::Call.new(exp, previous, arguments)
     end
-# require 'pry'; binding.pry
     exp
   end
 

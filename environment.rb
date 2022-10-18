@@ -22,6 +22,23 @@ class Environment
     values[name] = value
   end
 
+  def get_at(distance, name)
+    ancestor(distance).values[name];
+  end
+
+  def assign_at(distance, name, value)
+    ancestor(distance).values[name.lexeme] = value
+  end
+
+  def ancestor(distance)
+    enviroment = this
+    for in (0...distance) {
+      environment = environment.enclosing; 
+    }
+
+    enviroment
+  end
+
   def get(name)
     return values[name] if values.has_key?(name)
 

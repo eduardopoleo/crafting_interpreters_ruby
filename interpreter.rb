@@ -3,7 +3,7 @@ require_relative './native_functions'
 require_relative './lox_function'
 
 class Interpreter
-  attr_reader :environment, :statements, :globals
+  attr_reader :environment, :statements, :globals, :locals
   include NativeFunctions
 
   class RuntimeError < StandardError
@@ -34,6 +34,7 @@ class Interpreter
     # Add native functions to the environment
     @environment.define("clock", clock)
     @globals = @environment
+    @locals = {}
   end
 
   def interpret
@@ -108,6 +109,15 @@ class Interpreter
   
   def visit_assign(exp)
     value = evaluate(exp.value)
+    distance = locals.get(exp)
+
+    if distance != nil
+      enviroment.assign_at(distance, exp.name, value)
+    else
+      globals.assign(exp.name, value)
+    end
+
+
     environment.assign(exp.name.lexeme, value)
     value
   end
@@ -249,11 +259,21 @@ class Interpreter
   end
 
   def visit_variable(expression)
-    environment.get(expression.name.lexeme)
+    distance = locals[expression]
+
+    if distance != nil
+      return environment.get_at(distance, expression.name.lexemes)
+    else
+      return globals.get(expresion.name.lexeme)
+    end
   end
 
   def evaluate(statement)
     statement.accept(self)
+  end
+
+  def resolve(exp, depth)
+    locals[exp] = depth
   end
 
   def check_unary_operand(operator, operand)
