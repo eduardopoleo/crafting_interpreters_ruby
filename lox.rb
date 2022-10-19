@@ -1,6 +1,7 @@
 require "readline"
 require_relative './scanner'
 require_relative './parser'
+require_relative './resolver'
 require_relative './interpreter'
 require_relative './ast_printer'
 
@@ -35,8 +36,10 @@ class Lox
   def run(source)
     tokens = Scanner.new(source).scan
     statements = Parser.parse(tokens)
-
-    result = Interpreter.interpret(statements)
+    interpreter = Interpreter.new
+    # Stores the result on the interpreter's locals
+    Resolver.new(interpreter).resolve_multiple(statements)
+    interpreter.interpret(statements)
   end
 
   def run_file(file)

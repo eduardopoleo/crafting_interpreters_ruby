@@ -31,10 +31,10 @@ class Environment
   end
 
   def ancestor(distance)
-    enviroment = this
-    for in (0...distance) {
-      environment = environment.enclosing; 
-    }
+    enviroment = self
+    for i in (0...distance)
+      environment = environment.enclosing
+    end
 
     enviroment
   end

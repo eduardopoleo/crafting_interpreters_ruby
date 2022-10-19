@@ -6,9 +6,19 @@ class Resolver
     @scopes = []
   end
 
+  def resolve_multiple(stms_or_exps)
+    stms_or_exps.each do |stm_or_exp|
+      resolve(stm_or_exp)
+    end
+  end
+
+  def resolve(stm_or_exp)
+    stm_or_exp.accept(self)
+  end
+
   def visit_block(block)
     begin_scope
-    resolve(block.statements)
+    resolve_multiple(block.statements)
     end_scope
     return nil
   end
@@ -81,7 +91,7 @@ class Resolver
 
   def visit_while(while_statement)
     resolve(while_statement.condition)
-    resolve(while_statement.body)
+    resolve_multiple(while_statement.body)
     return nil
   end
 
@@ -125,7 +135,13 @@ class Resolver
 
   def declare(name)
     return if scopes.empty?
-    scopes[-1][name.lexeme] = false    
+    scope = scopes[-1]
+
+    if scope.has_key?(name.lexeme)
+      raise "Already a var in the scope with this name"
+    end
+
+    scope[name.lexeme] = false    
   end
 
   def define(name)
@@ -141,16 +157,10 @@ class Resolver
     scopes.pop
   end
 
-  def resolve(stms_or_exps)
-    stms_or_exps.each do |stm_or_exp|
-      stm_or_exp.accept(self)
-    end
-  end
-
   def resolve_local(exp, name)
     (scopes.size - 1).downto(0) do |i|
       if scopes[i].has_key?(name.lexeme)
-        interpret.resolve(exp, scopes.size - 1 - i)
+        interpreter.resolve(exp, scopes.size - 1 - i)
       end
     end
   end
@@ -161,7 +171,7 @@ class Resolver
       declare(param)
       define(param)
     end
-    resolve(function.body)
+    resolve_multiple(function.body)
     end_scope
   end
 end

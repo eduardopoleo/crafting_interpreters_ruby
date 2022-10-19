@@ -23,21 +23,22 @@ class Interpreter
     end
   end
 
-  def self.interpret(statements)
-    new(statements).interpret
-  end
-
-  def initialize(statements)
-    @statements = statements
+  def initialize
     @environment = Environment.new
 
     # Add native functions to the environment
     @environment.define("clock", clock)
     @globals = @environment
+    # Locals is a map between expression and distance
+    # is the only resolve from the resolver operation
+    # the idea is to calculate how many enclosing steps away is the variable to it's 
+    # corresponding value. The distance is then used in the enviroment to recursively 
+    # walk outwards until we hit the var value
     @locals = {}
   end
 
-  def interpret
+  def interpret(statements)
+    @statements = statements
     begin
       statements.each { |statement| evaluate(statement) }
     rescue RuntimeError => e
@@ -262,9 +263,9 @@ class Interpreter
     distance = locals[expression]
 
     if distance != nil
-      return environment.get_at(distance, expression.name.lexemes)
+      return environment.get_at(distance, expression.name.lexeme)
     else
-      return globals.get(expresion.name.lexeme)
+      return globals.get(expression.name.lexeme)
     end
   end
 
