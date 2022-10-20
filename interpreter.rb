@@ -110,14 +110,13 @@ class Interpreter
   
   def visit_assign(exp)
     value = evaluate(exp.value)
-    distance = locals.get(exp)
+    distance = locals[exp]
 
     if distance != nil
-      enviroment.assign_at(distance, exp.name, value)
+      environment.assign_at(distance, exp.name, value)
     else
       globals.assign(exp.name, value)
     end
-
 
     environment.assign(exp.name.lexeme, value)
     value

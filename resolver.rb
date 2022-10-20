@@ -91,7 +91,7 @@ class Resolver
 
   def visit_while(while_statement)
     resolve(while_statement.condition)
-    resolve_multiple(while_statement.body)
+    resolve(while_statement.body)
     return nil
   end
 

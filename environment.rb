@@ -31,12 +31,12 @@ class Environment
   end
 
   def ancestor(distance)
-    enviroment = self
+    environment = self
     for i in (0...distance)
       environment = environment.enclosing
     end
 
-    enviroment
+    environment
   end
 
   def get(name)
