@@ -105,4 +105,16 @@ class Expression
     end
   end
 
+  class Array
+    attr_reader :elements
+
+    def initialize(elements)
+      @elements = elements
+    end
+
+    def accept(visitor)
+      visitor.visit_array(self)
+    end
+  end
+
 end

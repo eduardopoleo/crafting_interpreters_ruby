@@ -22,7 +22,8 @@ class AstGenerator
     'literal'     => ['value'],
     'logical'     => ['left', 'operator', 'right'],
     'unary'       => ['operator', 'right'],
-    'variable'    => ['name']
+    'variable'    => ['name'],
+    'array'       => ['elements']
   }
 
   AST_STATEMENTS = {

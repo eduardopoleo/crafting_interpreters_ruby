@@ -131,6 +131,13 @@ class Resolver
     return nil
   end
 
+  def visit_array(array)
+    array.elements.each do |element|
+      resolve(element)
+    end
+    return nil
+  end
+
   private
 
   def declare(name)

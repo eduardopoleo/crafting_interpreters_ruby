@@ -137,7 +137,7 @@ class Interpreter
 
   def visit_print(print_statement)
     value = evaluate(print_statement.expression)
-    puts value
+    p value
     nil
   end
 
@@ -265,6 +265,12 @@ class Interpreter
       return environment.get_at(distance, expression.name.lexeme)
     else
       return globals.get(expression.name.lexeme)
+    end
+  end
+
+  def visit_array(array)
+    array.elements.map do |element|
+      evaluate(element)
     end
   end
 

@@ -14,7 +14,7 @@ require_relative './statement'
 
 # returnStmt      → "return" expresion?;
 # for_statment    → "for" "(" varDcl | expStm | ";" | expression? ";" | expression")" statement; 
-# if_statement     → "if" "(" expression ")" ("elif" "(" expression ")" statement)*? ("else" statement)? ;
+# if_statement    → "if" "(" expression ")" ("elif" "(" expression ")" statement)*? ("else" statement)? ;
 # printStmt       → "print" expression;
 # block           → "{" declaration "}"
 # exprStmt        → expression;
@@ -28,9 +28,10 @@ require_relative './statement'
 # comparison      → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 # term            → factor ( ( "-" | "+" ) factor )* ;
 # factor          → unary ( ( "/" | "*" | "%" ) unary )* ;
-# unary           → ( "!" | "-" ) unary | primary ;
+# unary           → ( "!" | "-" ) unary | call ;
 # call            → primary ( "(" arguments? ")")*
 # arguments       → expression ( "," expression)*;
+# array           → "[" ( "," expression)*? "]"
 # primary         → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER;
 
 # convers a "dumb" list sequential tokens into expressions
@@ -555,6 +556,18 @@ class Parser
 
     if match!(Token::Type::KEYWORDS['nil'])
       return Expression::Literal.new(nil) 
+    end
+
+    if match!(Token::Type::LEFT_SQUARE)
+      elements = []
+      if !match!(Token::Type::RIGHT_SQUARE)
+        begin
+          elements << expression
+        end while match!(Token::Type::COMMA)
+      end
+      # require 'pry'; binding.pry
+      consume!(Token::Type::RIGHT_SQUARE, "expected ] at #{current}")
+      return Expression::Array.new(elements)
     end
 
     if match!(Token::Type::LEFT_PAREN)

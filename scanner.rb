@@ -29,27 +29,31 @@ class Scanner
     case source[start]
     # These lexemes are easy becuase they consists of only 1 character
     when '('
-       add_token(Token::Type::LEFT_PAREN)
+      add_token(Token::Type::LEFT_PAREN)
     when ')'
-       add_token(Token::Type::RIGHT_PAREN)
+      add_token(Token::Type::RIGHT_PAREN)
     when '{'
-       add_token(Token::Type::LEFT_BRACE)
+      add_token(Token::Type::LEFT_BRACE)
     when '}'
-       add_token(Token::Type::RIGHT_BRACE)
+      add_token(Token::Type::RIGHT_BRACE)
+    when '['
+      add_token(Token::Type::LEFT_SQUARE)
+    when ']'
+      add_token(Token::Type::RIGHT_SQUARE)
     when ','
-       add_token(Token::Type::COMMA)
+      add_token(Token::Type::COMMA)
     when '.'
-       add_token(Token::Type::DOT)
+      add_token(Token::Type::DOT)
     when '-'
-       add_token(Token::Type::MINUS)
+      add_token(Token::Type::MINUS)
     when '+'
-       add_token(Token::Type::PLUS)
+      add_token(Token::Type::PLUS)
     when ';'
-       add_token(Token::Type::SEMICOLON)
+      add_token(Token::Type::SEMICOLON)
     when '*'
-       add_token(Token::Type::STAR);
+      add_token(Token::Type::STAR);
     when '%'
-       add_token(Token::Type::MODULO);
+      add_token(Token::Type::MODULO);
     when '!'
       # these are a bit more complicated because we need to look ahead 1 space 
       # to where the pointer is to decide what kid of token it should be
