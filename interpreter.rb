@@ -274,6 +274,12 @@ class Interpreter
     end
   end
 
+  def visit_array_accessor(accessor)
+    array = evaluate(accessor.array)
+    index = evaluate(accessor.index)
+    return array[index]
+  end
+
   def evaluate(statement)
     statement.accept(self)
   end

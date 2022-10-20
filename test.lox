@@ -4,9 +4,11 @@
 
   /*
 */
+var b = 7;
+var c = 10;
+var d = [1,2,3,4,5];
 
-print [5, 6, 7, 0, "a"];
-
+print d[4];
 // fun fib(n) {
 //   if (n <= 1) return n;
 //   return fib(n - 2) + fib(n - 1);

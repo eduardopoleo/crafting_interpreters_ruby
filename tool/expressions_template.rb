@@ -2,7 +2,7 @@
 
 class <%= base_name.capitalize %>
 <%- types.each do |type, fields| -%>
-  class <%= type.capitalize %>
+  class <%= type.split('_').collect!{ |w| w.capitalize }.join %>
     attr_reader <%= fields.map { |field| ':' + field }.join(', ') %>
 
     def initialize(<%= fields.map { |field| field }.join(', ') %>)

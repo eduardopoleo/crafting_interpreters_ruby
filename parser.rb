@@ -32,7 +32,7 @@ require_relative './statement'
 # call            → primary ( "(" arguments? ")")*
 # arguments       → expression ( "," expression)*;
 # array           → "[" ( "," expression)*? "]"
-# primary         → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER;
+# primary         → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | "[" ("," expression)*? "]" | IDENTIFIER;
 
 # convers a "dumb" list sequential tokens into expressions
 # - each experession corresponds to a legal operation
@@ -66,7 +66,7 @@ class Parser
       end
       statements
     rescue Parser::ParseError => e
-      raise_error("#{e.message} at #{current}")
+      raise_error("#{e.message} at #{peek.line}")
     end
   end
 
@@ -132,10 +132,10 @@ class Parser
   end
   
   def if_statement
-    raise_error("Expected ( at #{current}") unless match?(Token::Type::LEFT_PAREN)
+    raise_error("Expected ( at #{peek.line}") unless match?(Token::Type::LEFT_PAREN)
     advance
     condition = expression
-    raise_error("Expected ( at #{current}") unless match?(Token::Type::RIGHT_PAREN)
+    raise_error("Expected ( at #{peek.line}") unless match?(Token::Type::RIGHT_PAREN)
     advance
     then_branch = statement
 
@@ -163,7 +163,7 @@ class Parser
     # we advance to get to the actual token that we want to print
     value = expression
     # if after all the expression has been resolved we do not have a semicolon fail
-    raise_error("expected ; at #{current}") unless match?(Token::Type::SEMICOLON)
+    raise_error("expected ; at #{peek.line}") unless match?(Token::Type::SEMICOLON)
     # we consume the semi colon token.
     advance
     Statement::Print.new(value)
@@ -177,17 +177,17 @@ class Parser
       value = expression
     end
 
-    consume!(Token::Type::SEMICOLON, "Expected ; at #{current}")
+    consume!(Token::Type::SEMICOLON, "Expected ; at #{peek.line}")
 
     Statement::Return.new(keyword, value)
   end
 
   def while_statement
-    raise_error("expected ( at #{current}") unless match?(Token::Type::LEFT_PAREN)
+    raise_error("expected ( at #{peek.line}") unless match?(Token::Type::LEFT_PAREN)
     advance
     condition = expression
 
-    raise_error("expected ) at #{current}") unless match?(Token::Type::RIGHT_PAREN)
+    raise_error("expected ) at #{peek.line}") unless match?(Token::Type::RIGHT_PAREN)
     advance
     body = statement
 
@@ -272,14 +272,14 @@ class Parser
       statements << declaration
     end
 
-    raise_error("Expected } at #{current}") unless match?(Token::Type::RIGHT_BRACE)
+    raise_error("Expected } at #{peek.line}") unless match?(Token::Type::RIGHT_BRACE)
     advance
     statements
   end
 
   def expression_statement
     exp = expression
-    raise_error("expected ) at #{current}") unless match?(Token::Type::SEMICOLON)
+    raise_error("expected ) at #{peek.line}") unless match?(Token::Type::SEMICOLON)
     advance
     Statement::Expression.new(exp)
   end
@@ -520,12 +520,12 @@ class Parser
       if !check(Token::Type::RIGHT_PAREN)
         # Iterate until you run out of commas the first loop does not require a comma.
         begin
-          raise_error("Too many arguments at #{current}") if arguments.size >= MAX_NUMBER_OF_ARGUMENTS
+          raise_error("Too many arguments at #{peek.line}") if arguments.size >= MAX_NUMBER_OF_ARGUMENTS
           arguments << expression
         end while(match!(Token::Type::COMMA))
       end
 
-      consume!(Token::Type::RIGHT_PAREN, "Expected ) at #{current}")
+      consume!(Token::Type::RIGHT_PAREN, "Expected ) at #{peek.line}")
       # Current token contains the closing param
       exp = Expression::Call.new(exp, previous, arguments)
     end
@@ -551,7 +551,16 @@ class Parser
     end
 
     if match!(Token::Type::IDENTIFIER)
-      return Expression::Variable.new(previous)
+      variable = Expression::Variable.new(previous)
+      # This tries to access the specific element in an array
+      if match!(Token::Type::LEFT_SQUARE)
+        index = expression
+        # require 'pry'; binding.pry
+        consume!(Token::Type::RIGHT_SQUARE, "Expected ] at #{peek.line}")
+        return Expression::ArrayAccessor.new(variable, index)
+      end
+
+      return variable
     end
 
     if match!(Token::Type::KEYWORDS['nil'])
@@ -565,14 +574,13 @@ class Parser
           elements << expression
         end while match!(Token::Type::COMMA)
       end
-      # require 'pry'; binding.pry
-      consume!(Token::Type::RIGHT_SQUARE, "expected ] at #{current}")
+      consume!(Token::Type::RIGHT_SQUARE, "expected ] at #{peek.line}")
       return Expression::Array.new(elements)
     end
 
     if match!(Token::Type::LEFT_PAREN)
       exp = expression
-      consume!(Token::Type::RIGHT_PAREN, "expected ) at #{current}")
+      consume!(Token::Type::RIGHT_PAREN, "expected ) at #{peek.line}")
       return Expression::Grouping.new(exp)
     end
 
@@ -617,7 +625,7 @@ class Parser
   end
 
   def consume!(type, error)
-    raise_error("expected #{type} at #{current}") unless match!(type)
+    raise_error("expected #{type} at #{peek.line}") unless match!(type)
 
     previous
   end

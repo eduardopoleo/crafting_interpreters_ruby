@@ -138,6 +138,11 @@ class Resolver
     return nil
   end
 
+  def visit_array_accessor(array_accessor)
+    resolve(array_accessor.array)
+    resolve(array_accessor.index)
+  end
+
   private
 
   def declare(name)

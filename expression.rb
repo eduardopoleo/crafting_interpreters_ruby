@@ -117,4 +117,17 @@ class Expression
     end
   end
 
+  class ArrayAccessor
+    attr_reader :array, :index
+
+    def initialize(array, index)
+      @array = array
+      @index = index
+    end
+
+    def accept(visitor)
+      visitor.visit_array_accessor(self)
+    end
+  end
+
 end
