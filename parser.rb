@@ -512,7 +512,7 @@ class Parser
   # function calls
   MAX_NUMBER_OF_ARGUMENTS = 255
   def call
-    exp = primary
+    exp = array_look_up
     # this is the same deal as the other expressions.
     # this while loop allows us to target ALL funtion calls in the expression
     while match!(Token::Type::LEFT_PAREN)
@@ -532,6 +532,18 @@ class Parser
     exp
   end
 
+  def array_look_up
+    exp = primary
+
+    if match!(Token::Type::LEFT_SQUARE)
+      index = expression
+      consume!(Token::Type::RIGHT_SQUARE, "Expected ] at #{peek.line}")
+      exp = Expression::ArrayAccessor.new(exp, index)
+    end
+
+    exp
+  end
+
   # primary → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" ;
   def primary
     if match?([Token::Type::NUMBER, Token::Type::STRING])
@@ -545,22 +557,12 @@ class Parser
       return Expression::Literal.new(true) 
     end
 
-    if match?(Token::Type::KEYWORDS['false'])
-      advance
+    if match!(Token::Type::KEYWORDS['false'])
       return Expression::Literal.new(false)
     end
 
     if match!(Token::Type::IDENTIFIER)
-      variable = Expression::Variable.new(previous)
-      # This tries to access the specific element in an array
-      if match!(Token::Type::LEFT_SQUARE)
-        index = expression
-        # require 'pry'; binding.pry
-        consume!(Token::Type::RIGHT_SQUARE, "Expected ] at #{peek.line}")
-        return Expression::ArrayAccessor.new(variable, index)
-      end
-
-      return variable
+      return Expression::Variable.new(previous)
     end
 
     if match!(Token::Type::KEYWORDS['nil'])
