@@ -280,7 +280,7 @@ class Interpreter
 
     return array[index] if accessor.operation == 'get'
     
-    array[index] = accessor.value_exp.value
+    array[index] = evaluate(accessor.value_exp)
   end
 
   def evaluate(statement)

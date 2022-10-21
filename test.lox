@@ -12,7 +12,7 @@ var c = [];
 print d[4] + d[1] + d[2];
 print c;
 
-d[0] = 10;
+d[0] = b;
 
 print d;
 // print d[4];
