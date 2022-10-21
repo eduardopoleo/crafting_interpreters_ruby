@@ -141,6 +141,10 @@ class Resolver
   def visit_array_accessor(array_accessor)
     resolve(array_accessor.array)
     resolve(array_accessor.index)
+
+    if array_accessor.operation == 'set'
+      resolve(array_accessor.value_exp)
+    end
   end
 
   private

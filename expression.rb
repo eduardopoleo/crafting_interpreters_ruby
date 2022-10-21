@@ -118,11 +118,13 @@ class Expression
   end
 
   class ArrayAccessor
-    attr_reader :array, :index
+    attr_reader :array, :index, :value_exp, :operation
 
-    def initialize(array, index)
+    def initialize(array, index, value_exp, operation)
       @array = array
       @index = index
+      @value_exp = value_exp
+      @operation = operation
     end
 
     def accept(visitor)

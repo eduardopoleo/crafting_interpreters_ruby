@@ -532,13 +532,22 @@ class Parser
     exp
   end
 
+  # array[index] | array[index] =
   def array_look_up
     exp = primary
 
     if match!(Token::Type::LEFT_SQUARE)
       index = expression
       consume!(Token::Type::RIGHT_SQUARE, "Expected ] at #{peek.line}")
-      exp = Expression::ArrayAccessor.new(exp, index)
+
+      value_exp = nil
+      operation = 'get'
+      if match!(Token::Type::EQUAL)
+        value_exp = expression
+        operation = 'set'
+      end
+
+      exp = Expression::ArrayAccessor.new(exp, index, value_exp, operation)
     end
 
     exp
@@ -571,7 +580,7 @@ class Parser
 
     if match!(Token::Type::LEFT_SQUARE)
       elements = []
-      if !match!(Token::Type::RIGHT_SQUARE)
+      if !(peek.type == Token::Type::RIGHT_SQUARE)
         begin
           elements << expression
         end while match!(Token::Type::COMMA)

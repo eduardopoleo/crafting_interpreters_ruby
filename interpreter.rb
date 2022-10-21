@@ -277,7 +277,10 @@ class Interpreter
   def visit_array_accessor(accessor)
     array = evaluate(accessor.array)
     index = evaluate(accessor.index)
-    return array[index]
+
+    return array[index] if accessor.operation == 'get'
+    
+    array[index] = accessor.value_exp.value
   end
 
   def evaluate(statement)
