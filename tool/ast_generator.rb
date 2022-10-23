@@ -24,7 +24,7 @@ class AstGenerator
     'unary'       => ['operator', 'right'],
     'variable'    => ['name'],
     'array'       => ['elements'],
-    'array_accessor' => ['array', 'index', 'value_exp', 'operation']
+    'array_accessor' => ['array', 'index', 'value_exp', 'operation'],
   }
 
   AST_STATEMENTS = {

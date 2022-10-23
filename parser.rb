@@ -512,7 +512,7 @@ class Parser
   # function calls
   MAX_NUMBER_OF_ARGUMENTS = 255
   def call
-    exp = array_look_up
+    exp = array_accessor
     # this is the same deal as the other expressions.
     # this while loop allows us to target ALL funtion calls in the expression
     while match!(Token::Type::LEFT_PAREN)
@@ -533,7 +533,7 @@ class Parser
   end
 
   # array[index] | array[index] =
-  def array_look_up
+  def array_accessor
     exp = primary
 
     if match!(Token::Type::LEFT_SQUARE)
