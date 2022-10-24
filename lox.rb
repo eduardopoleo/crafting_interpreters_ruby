@@ -1,5 +1,5 @@
 require "readline"
-require_relative './scanner'
+require_relative './lexer'
 require_relative './parser'
 require_relative './resolver'
 require_relative './interpreter'
@@ -34,12 +34,13 @@ class Lox
   end
 
   def run(source)
-    tokens = Scanner.new(source).scan
-    statements = Parser.parse(tokens)
-    interpreter = Interpreter.new
+    tokens = ModalLexer.new(source).scan
+    require 'pry'; binding.pry
+    # statements = Parser.parse(tokens)
+    # interpreter = Interpreter.new
     # Stores the result on the interpreter's locals
-    Resolver.new(interpreter).resolve_multiple(statements)
-    interpreter.interpret(statements)
+    # Resolver.new(interpreter).resolve_multiple(statements)
+    # interpreter.interpret(statements)
   end
 
   def run_file(file)

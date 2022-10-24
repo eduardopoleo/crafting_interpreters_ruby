@@ -45,6 +45,10 @@ class Token
     STRING = 'STRING'
     NUMBER = 'NUMBER'
     
+    # String related
+    STRING_INIT = 'STRING_INIT'
+    STRING_END = 'STRING_END'
+
     # need
     KEYWORDS = {
       "and"    => 'AND',
