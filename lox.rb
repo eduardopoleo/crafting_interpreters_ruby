@@ -1,5 +1,5 @@
 require "readline"
-require_relative './lexer'
+require_relative './modal_lexer'
 require_relative './parser'
 require_relative './resolver'
 require_relative './interpreter'

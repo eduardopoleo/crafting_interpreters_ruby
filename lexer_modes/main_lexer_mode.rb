@@ -1,100 +1,13 @@
-require_relative './token'
-
-
-# "hello %{expression} something else"
-# string_init
-# string_literal, 'hello'
-# string_inter_pol
-# expression
-# string_literal 'something else'
-class Scanner
-  attr_accessor :source, :token_start, :token_end, :current_line
-
-  def initialize(source)
-    @source = source
-    @token_start = 0
-    @token_end = 0
-    @current_line = 1
-  end
-
-  def peek_next
-    return "\0" if token_end + 1 >= source.length
-    return source[token_end + 1]
-  end
-
-  def peek
-    return "\0" if at_end?
-    return source[token_end]
-  end
-
-  def char_at_start
-    return source[token_start]
-  end
-
-  def char_at_end
-    return source[token_end]
-  end
-
-  def token_end_matches?(expected_pointer_char)
-    return false if at_end?
-    return false if source[token_end] != expected_pointer_char
-
-    true
-  end
-
-  def current_lexeme
-    source[token_start...token_end]
-  end
-
-  def at_end?
-    return token_end >= source.length
-  end
-
-  def advance_token_end
-    @token_end += 1
-  end
-
-  def advance_line
-    @current_line += 1
-  end
-end
-
-class ModalLexer
-  attr_reader :mode, :tokens, :scanner
-
-  def initialize(source)
-    @scanner = Scanner.new(source)
-    @tokens = []
-    @mode_stack = [MainLexerMode]
-  end
-
-  def scan
-    while !scanner.at_end?
-      token = next_token
-      tokens << token if token 
-    end
-
-    tokens << Token.new(Token::Type::EOF, "", nil, scanner.current_line)
-  end
-
-  def next_token
-     # Beginning of the token is where the previous token finished
-    scanner.token_start = scanner.token_end
-     # Move the end of the token 1 step further
-    scanner.advance_token_end
-    @mode_stack.last.next_token(scanner)
-  end
-end
-
 class MainLexerMode
-  attr_reader :scanner
+  attr_reader :scanner, :mode_stack
 
-  def self.next_token(scanner)
-    new(scanner).next_token
+  def self.next_token(scanner, mode_stack)
+    new(scanner, mode_stack).next_token
   end
   
-  def initialize(scanner)
+  def initialize(scanner, mode_stack)
     @scanner = scanner
+    @mode_stack = mode_stack
   end
 
   def next_token
@@ -196,7 +109,8 @@ class MainLexerMode
       scanner.advance_line
     when '"'
       # change this to store the strings
-      store_string
+      type = Token::Type::STRING_START
+      mode_stack << StringLexerMode
     else
       # These are now "free form" type of expression so we can't programatically
       # consume pointer cuz we do not know how long characters will be.
@@ -256,21 +170,4 @@ class MainLexerMode
 
     scanner.current_lexeme.to_f
   end
-
-  # def store_string
-  #   while(peek != '"' && !at_end?) do
-  #     scanner.advance_token_end
-  #   end
-
-  #   raise "Unfinished string" if at_end?
-    
-  #   # advancing here makes sure we consume the pointer with the ending "
-  #   scanner.advance_token_end
-
-  #   # for a scan with "my_string"
-  #   # lexeme would be "my_string" ->  start...pointer
-  #   # literal: my_string -> (start + 1)...(pointer - 1) to removes the ""
-  #   literal_value = source[start+1...pointer-1]
-  #   add_token(Token::Type::STRING, literal_value)
-  # end
 end

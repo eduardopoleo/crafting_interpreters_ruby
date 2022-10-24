@@ -46,8 +46,11 @@ class Token
     NUMBER = 'NUMBER'
     
     # String related
-    STRING_INIT = 'STRING_INIT'
+    STRING_START = 'STRING_START'
     STRING_END = 'STRING_END'
+    STRING_INT_START = 'STRING_INT_START'
+    STRING_INT_END = 'STRING_INT_END'
+    STRING_LIT = 'STRING_LIT'
 
     # need
     KEYWORDS = {
