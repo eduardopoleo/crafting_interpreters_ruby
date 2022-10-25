@@ -23,6 +23,8 @@ class Interpreter
     end
   end
 
+  class LoopBreakException < StandardError; end
+
   def initialize
     @environment = Environment.new
 
@@ -103,9 +105,14 @@ class Interpreter
   end
 
   def visit_while(exp)
-    while evaluate(exp.condition)
-      evaluate(exp.body)
+    begin
+      while evaluate(exp.condition)
+        evaluate(exp.body)
+      end
+    rescue LoopBreakException => e
+      # Do nothing just exit out of the closest while loop
     end
+
     nil
   end
   
@@ -113,12 +120,12 @@ class Interpreter
     value = evaluate(exp.value)
     distance = locals[exp]
 
-    if distance != nil
-      environment.assign_at(distance, exp.name, value)
+    if distance.nil?
+      globals.assign(exp.name.lexeme, value)
     else
-      globals.assign(exp.name, value)
+      environment.assign_at(distance, exp.name, value)
     end
-
+    
     environment.assign(exp.name.lexeme, value)
     value
   end
@@ -149,6 +156,10 @@ class Interpreter
     end
 
     raise FunctionReturnException.new(value)
+  end
+
+  def visit_break(_break)
+    raise LoopBreakException
   end
 
   def visit_block(block_statement)

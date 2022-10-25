@@ -155,6 +155,8 @@ class Resolver
     nil
   end
 
+  def visit_break(_break); end # noop
+
   private
 
   def declare(name)

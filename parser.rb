@@ -113,6 +113,10 @@ class Parser
       return return_statement
     end
 
+    if match!(Token::Type::KEYWORDS['break'])
+      return break_statement
+    end
+
     if match?(Token::Type::KEYWORDS['while'])
       advance
       return while_statement
@@ -180,6 +184,12 @@ class Parser
     consume!(Token::Type::SEMICOLON, "Expected ; at #{peek.line}")
 
     Statement::Return.new(keyword, value)
+  end
+
+  def break_statement
+    consume!(Token::Type::SEMICOLON, "Expected ; at #{peek.line}")
+
+    Statement::Break.new
   end
 
   def while_statement

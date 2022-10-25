@@ -35,9 +35,10 @@ class AstGenerator
     'if'         => ['condition', 'then_branch', 'elif_statements', 'other_branch'],
     'elif'       => ['condition', 'branch'],
     'print'      => ['expression'],
-    'return'     => ['keywork', 'value'],
+    'return'     => ['keyword', 'value'],
     'var'        => ['name', 'initializer'],
-    'while'      => ['condition', 'body']
+    'while'      => ['condition', 'body'],
+    'break'      => []
   }
 
   def generate

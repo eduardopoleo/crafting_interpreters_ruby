@@ -70,7 +70,8 @@ class Token
       "this"   => 'THIS',
       "true"   => 'TRUE',
       "var"    => 'VAR',
-      "while"  => 'WHILE'
+      "while"  => 'WHILE',
+      "break"  => 'BREAK'
     }
   end
 end

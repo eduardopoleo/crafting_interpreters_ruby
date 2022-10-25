@@ -4,7 +4,12 @@
 
   /*
 */
+var a = 0;
+
 while(true) {
-  var a = readline();
-  print "This is your input: %{a}";
+  a = a + 1;
+  print a;
+  if (a == 10) {
+    break;
+  }
 }

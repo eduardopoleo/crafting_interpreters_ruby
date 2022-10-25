@@ -80,10 +80,10 @@ class Statement
   end
 
   class Return
-    attr_reader :keywork, :value
+    attr_reader :keyword, :value
 
-    def initialize(keywork, value)
-      @keywork = keywork
+    def initialize(keyword, value)
+      @keyword = keyword
       @value = value
     end
 
@@ -115,6 +115,17 @@ class Statement
 
     def accept(visitor)
       visitor.visit_while(self)
+    end
+  end
+
+  class Break
+    attr_reader 
+
+    def initialize()
+    end
+
+    def accept(visitor)
+      visitor.visit_break(self)
     end
   end
 
