@@ -15,10 +15,12 @@
 
 // print d[4];
 
-var a = 5;
-var b = 6;
+var a = "5";
+var b = "6";
+var c = "1";
+var d = "2";
 
-print "The sum is: %{a + b}";
+print "The sum is: %{a + b + " and this is another inter %{c + d}"}";
 
 // fun fib(n) {
 //   if (n <= 1) return n;
