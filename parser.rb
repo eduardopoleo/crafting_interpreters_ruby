@@ -279,7 +279,7 @@ class Parser
 
   def expression_statement
     exp = expression
-    raise_error("expected ) at #{peek.line}") unless match?(Token::Type::SEMICOLON)
+    raise_error("expected ; at #{peek.line}") unless match?(Token::Type::SEMICOLON)
     advance
     Statement::Expression.new(exp)
   end

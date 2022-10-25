@@ -28,6 +28,7 @@ class Interpreter
 
     # Add native functions to the environment
     @environment.define("clock", clock)
+    @environment.define("readline", readline)
     @globals = @environment
     # Locals is a map between expression and distance
     # is the only resolve from the resolver operation
