@@ -145,6 +145,14 @@ class Resolver
     if array_accessor.operation == 'set'
       resolve(array_accessor.value_exp)
     end
+    nil
+  end
+
+  def visit_string_group(string_group)
+    string_group.expressions.each do |exp|
+      resolve(exp)
+    end
+    nil
   end
 
   private

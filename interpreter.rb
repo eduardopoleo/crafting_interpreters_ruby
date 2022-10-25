@@ -283,6 +283,15 @@ class Interpreter
     array[index] = evaluate(accessor.value_exp)
   end
 
+  def visit_string_group(string_group)
+    string = ''
+    string_group.expressions.each do |exp|
+      string = string + evaluate(exp).to_s
+    end
+
+    string
+  end
+
   def evaluate(statement)
     statement.accept(self)
   end

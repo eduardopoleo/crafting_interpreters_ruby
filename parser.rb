@@ -555,14 +555,29 @@ class Parser
 
   # primary → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" ;
   def primary
-    if match?([Token::Type::NUMBER, Token::Type::STRING])
-      exp = Expression::Literal.new(peek.literal)
-      advance
+    if match!(Token::Type::STRING_START)
+      expressions = []
+
+      while !match!(Token::Type::STRING_END)
+        expressions << expression
+      end
+
+      return Expression::StringGroup.new(expressions)
+    end
+
+    if match!(Token::Type::STRING_INT_START)
+      exp = expression
+      
+      consume!(Token::Type::STRING_INT_END, "Expected string inter } tag")
+
       return exp
     end
 
-    if match?(Token::Type::KEYWORDS['true'])
-      advance
+    if match!([Token::Type::NUMBER, Token::Type::STRING_LIT])
+      return Expression::Literal.new(previous.literal)
+    end
+
+    if match!(Token::Type::KEYWORDS['true'])
       return Expression::Literal.new(true) 
     end
 
@@ -594,7 +609,7 @@ class Parser
       consume!(Token::Type::RIGHT_PAREN, "expected ) at #{peek.line}")
       return Expression::Grouping.new(exp)
     end
-
+require 'pry'; binding.pry
     raise_error('Expected expression')
   end
 

@@ -25,6 +25,7 @@ class AstGenerator
     'variable'    => ['name'],
     'array'       => ['elements'],
     'array_accessor' => ['array', 'index', 'value_exp', 'operation'],
+    'string_group' => ['expressions']
   }
 
   AST_STATEMENTS = {

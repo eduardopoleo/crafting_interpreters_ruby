@@ -35,12 +35,12 @@ class Lox
 
   def run(source)
     tokens = ModalLexer.new(source).scan
-    require 'pry'; binding.pry
-    # statements = Parser.parse(tokens)
-    # interpreter = Interpreter.new
+    statements = Parser.parse(tokens)
+    # require 'pry'; binding.pry
+    interpreter = Interpreter.new
     # Stores the result on the interpreter's locals
-    # Resolver.new(interpreter).resolve_multiple(statements)
-    # interpreter.interpret(statements)
+    Resolver.new(interpreter).resolve_multiple(statements)
+    interpreter.interpret(statements)
   end
 
   def run_file(file)

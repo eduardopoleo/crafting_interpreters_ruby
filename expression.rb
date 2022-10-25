@@ -132,4 +132,16 @@ class Expression
     end
   end
 
+  class StringGroup
+    attr_reader :expressions
+
+    def initialize(expressions)
+      @expressions = expressions
+    end
+
+    def accept(visitor)
+      visitor.visit_string_group(self)
+    end
+  end
+
 end

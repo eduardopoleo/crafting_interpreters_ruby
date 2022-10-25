@@ -15,9 +15,10 @@
 
 // print d[4];
 
-var a = "5";
+var a = 5;
+var b = 6;
 
-print "The sum is: %{"this is just a number %{a}"}";
+print "The sum is: %{a + b}";
 
 // fun fib(n) {
 //   if (n <= 1) return n;
