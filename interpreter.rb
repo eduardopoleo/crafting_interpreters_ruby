@@ -31,6 +31,7 @@ class Interpreter
     # Add native functions to the environment
     @environment.define("clock", clock)
     @environment.define("readline", readline)
+    @environment.define("coerce_to_i", coerce_to_i)
     @globals = @environment
     # Locals is a map between expression and distance
     # is the only resolve from the resolver operation
@@ -145,7 +146,7 @@ class Interpreter
 
   def visit_print(print_statement)
     value = evaluate(print_statement.expression)
-    p value
+    puts value
     nil
   end
 
@@ -250,13 +251,12 @@ class Interpreter
   # unary → ( "!" | "-" ) unary | primary ;
   def visit_unary(exp)
     right = evaluate(exp.right)
-  
     case exp.operator.type
     when Token::Type::MINUS
       check_unary_operand(operator, right)
       -right
     when Token::Type::BANG # Weird thing.
-      !!right
+      !right
     end
   end
 

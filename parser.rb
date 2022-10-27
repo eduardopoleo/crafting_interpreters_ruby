@@ -156,8 +156,7 @@ class Parser
     end
 
     other_branch = nil
-    if match?(Token::Type::KEYWORDS['else'])
-      advance
+    if match!(Token::Type::KEYWORDS['else'])
       other_branch = statement
     end
     Statement::If.new(condition, then_branch, elif_statements, other_branch)
@@ -505,12 +504,12 @@ class Parser
     exp
   end
 
-  # unary → ( "!" | "-" ) unary | primary ;
+  # unary → ( "!" | "-" ) unary | call ;
+  # this recurse so that is right associative
   def unary
-    if match?([Token::Type::BANG, Token::Type::MINUS])
-      operator = peek.type
-      advance
-      right = primary
+    if match!([Token::Type::BANG, Token::Type::MINUS])
+      operator = previous
+      right = unary
 
       return Expression::Unary.new(operator, right)
     end
@@ -619,7 +618,7 @@ class Parser
       consume!(Token::Type::RIGHT_PAREN, "expected ) at #{peek.line}")
       return Expression::Grouping.new(exp)
     end
-require 'pry'; binding.pry
+# require 'pry'; binding.pry
     raise_error('Expected expression')
   end
 
