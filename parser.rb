@@ -5,7 +5,9 @@ require_relative './statement'
 
 # program         → statement* EOF ;
 
-# declaration     → fucDecl | var_declaration | statement 
+# declaration     → fucDecl | var_declaration | statement | classDecl
+
+# classDeck       → "class" IDENTIFIER "{" function "}"
 # fucDecl         → "fun" function;
 # function        → IDENTIFIER "(" parameters? ")" block;
 # parameters      → IDENTIFIER ("," IDENTIFIER)*;
@@ -73,6 +75,7 @@ class Parser
   def declaration
     return fun_declaration("function") if match!(Token::Type::KEYWORDS['fun'])
     return var_declaration if match!(Token::Type::KEYWORDS['var'])
+    return class_declaration if match!(Token::Type::KEYWORDS['class'])
   
     statement
   end
@@ -96,6 +99,21 @@ class Parser
     consume!(Token::Type::LEFT_BRACE, "Expect '{' before #{kind} body")
     body = block
     Statement::Function.new(name, parameters, body)
+  end
+
+  def class_declaration
+    name = consume!(Token::Type::IDENTIFIER, 'Expected class name')
+    consume!(Token::Type::LEFT_BRACE, "Expect '{' before class body.")
+
+    methods = []
+
+    while (!check(Token::Type::RIGHT_BRACE && !at_end))
+      method << fun_declaration('method')
+    end
+
+    consume(Token::Type::RIGHT_BRACE, "Expect '}', after class body")
+
+    return Statement::Class.new(name, methods)
   end
 
   def statement

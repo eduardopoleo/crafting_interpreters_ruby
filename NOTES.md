@@ -65,3 +65,4 @@ TODO:
 - Understand expression vs statement.
 - Understand infix, sufix, prefix etc
 - Review how to derive grammars
+- Review function and environments

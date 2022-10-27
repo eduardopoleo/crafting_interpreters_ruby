@@ -71,7 +71,8 @@ class Token
       "true"   => 'TRUE',
       "var"    => 'VAR',
       "while"  => 'WHILE',
-      "break"  => 'BREAK'
+      "break"  => 'BREAK',
+      "class"  => 'CLASS'
     }
   end
 end

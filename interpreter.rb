@@ -304,6 +304,11 @@ class Interpreter
     string
   end
 
+  def visit_class(klass_statement)
+    klass = LoxClass.new(klass_statement.name.lexeme)
+    enviroment.define(klass_statement.name.lexeme, klass)
+  end
+
   def evaluate(statement)
     statement.accept(self)
   end

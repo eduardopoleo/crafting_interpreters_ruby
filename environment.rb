@@ -51,10 +51,11 @@ class Environment
   end
 
   def assign(name, value)
+    # in the book he passes the token here so the api is different
     return values[name] = value if values.has_key?(name)
 
     return enclosing.define(name, value) if !enclosing.nil?
-# require 'pry'; binding.pry
+
     raise RuntimeError.new(
       name,
       "Variable #{name} not defined"

@@ -129,4 +129,16 @@ class Statement
     end
   end
 
+  class Class
+    attr_reader :name, methods
+
+    def initialize(name, methods)
+      @name, methods = name, methods
+    end
+
+    def accept(visitor)
+      visitor.visit_class(self)
+    end
+  end
+
 end

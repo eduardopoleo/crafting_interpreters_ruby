@@ -157,6 +157,12 @@ class Resolver
 
   def visit_break(_break); end # noop
 
+  def visit_class(klass)
+    declare(klass.name)
+    define(klass.name)
+    nil
+  end
+
   private
 
   def declare(name)
