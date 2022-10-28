@@ -1,6 +1,7 @@
 require_relative './environment'
 require_relative './native_functions'
 require_relative './lox_function'
+require_relative './lox_class'
 
 class Interpreter
   attr_reader :environment, :statements, :globals, :locals
@@ -306,7 +307,7 @@ class Interpreter
 
   def visit_class(klass_statement)
     klass = LoxClass.new(klass_statement.name.lexeme)
-    enviroment.define(klass_statement.name.lexeme, klass)
+    environment.define(klass_statement.name.lexeme, klass)
   end
 
   def evaluate(statement)

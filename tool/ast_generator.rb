@@ -39,7 +39,7 @@ class AstGenerator
     'var'        => ['name', 'initializer'],
     'while'      => ['condition', 'body'],
     'break'      => [],
-    'class'      => ['name, methods']
+    'class'      => ['name', 'methods']
   }
 
   def generate

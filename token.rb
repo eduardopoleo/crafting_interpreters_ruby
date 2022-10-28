@@ -55,7 +55,6 @@ class Token
     # need
     KEYWORDS = {
       "and"    => 'AND',
-      "class"  => 'CLASS',
       "else"   => 'ELSE',
       "false"  => 'FALSE',
       "for"    => 'FOR',

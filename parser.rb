@@ -104,14 +104,13 @@ class Parser
   def class_declaration
     name = consume!(Token::Type::IDENTIFIER, 'Expected class name')
     consume!(Token::Type::LEFT_BRACE, "Expect '{' before class body.")
-
     methods = []
 
-    while (!check(Token::Type::RIGHT_BRACE && !at_end))
-      method << fun_declaration('method')
+    while (!check(Token::Type::RIGHT_BRACE) && !at_end?)
+      methods << fun_declaration('method')
     end
 
-    consume(Token::Type::RIGHT_BRACE, "Expect '}', after class body")
+    consume!(Token::Type::RIGHT_BRACE, "Expect '}', after class body")
 
     return Statement::Class.new(name, methods)
   end
@@ -678,7 +677,7 @@ class Parser
   end
 
   def consume!(type, error)
-    raise_error("expected #{type} at #{peek.line}") unless match!(type)
+    raise_error("#{error} at #{peek.line}") unless match!(type)
 
     previous
   end

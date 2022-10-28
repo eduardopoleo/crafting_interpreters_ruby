@@ -130,10 +130,11 @@ class Statement
   end
 
   class Class
-    attr_reader :name, methods
+    attr_reader :name, :methods
 
     def initialize(name, methods)
-      @name, methods = name, methods
+      @name = name
+      @methods = methods
     end
 
     def accept(visitor)
