@@ -228,11 +228,7 @@ class Parser
   end
 
   def for_statement
-    # This will convert the for loop like this:
-    # for (var i = 0; i < 10; i = i + 1)
-    # print i;
-  
-    # into 
+    # Equivalent to
     # {
     #   var i = 0;
     #   while (i < 10) {
@@ -241,15 +237,12 @@ class Parser
     #   }
     # }
 
-    raise_error("expected ( the for") unless match?(Token::Type::LEFT_PAREN)
-    advance
+    consume!(Token::Type::LEFT_PAREN, "expected ( the for")
     initializer = nil
 
-    if match?(Token::Type::SEMICOLON)
-      advance
+    if match!(Token::Type::SEMICOLON)
       initializer = nil
-    elsif match?(Token::Type::KEYWORDS['var'])
-      advance
+    elsif match!(Token::Type::KEYWORDS['var'])
       initializer = var_declaration
     else
       initializer = expression
@@ -260,18 +253,16 @@ class Parser
     if peek != Token::Type::SEMICOLON
       condition = expression
     end
-    raise_error("expected ; the for") unless match?(Token::Type::SEMICOLON)
-    advance
+    consume!(Token::Type::SEMICOLON, "expected ; the for")
 
     increment = nil
     if peek != Token::Type::RIGHT_PAREN
       increment = expression
     end
+    consume!(Token::Type::RIGHT_PAREN, "expected ) the for")
 
-    raise_error("expected ) the for") unless match?(Token::Type::RIGHT_PAREN)
-    advance
-
-    body = statement
+    # TODO: Shouldn't this be a block?
+    body = declaration_or_statement
 
     # if there is an increment e.g i = i + 1 we append it
     # to the last part of the body
