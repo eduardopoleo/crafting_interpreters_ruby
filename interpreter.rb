@@ -73,6 +73,9 @@ class Interpreter
   end
 
   def visit_call(call_exp)
+    # this actually evaluates to visit_variable
+    # which in turn fetches the value of the callable (class or function)
+    # from the environment
     callee = evaluate(call_exp.callee)
     arguments = []
     call_exp.arguments.each { |arg| arguments << evaluate(arg) }

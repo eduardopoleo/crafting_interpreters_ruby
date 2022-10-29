@@ -80,6 +80,28 @@ class Parser
     statement
   end
 
+  # Function life-cycle
+  #### fun myFunc(param1, param2, param3) {} ####
+  # Parser -> fun gets parse our first
+  # Parser -> fun_declaration -> Statement::Function
+  #   token             -> name (myFunc)
+  #   [token, token..]  -> arguments (param1, param2, param3)
+  #   block statements  -> body (block)
+  # Interpreter -> visit_funtion
+  #   func = LoxFunction.new(Statement::Function, env) # environment when the function was defined
+  #   env[myFunc] = func -> save the function in the current env to be able to call
+  #### myFunc(a, b, c) ####
+  # Parser -> call -> Expression::Call
+  #   IDENTIFIER    -> callee (myFunc)
+  #   [exp, exp...] -> arguments (a_exp, b_exp, c_exp)
+  # Interpreter  -> visit_call
+  #   fetches LoxFuntion from env[myFunc]
+  #   evaluates every argument expression
+  #   LoxFunction.call(interpreter, arguments)
+  #      Create new environment for the function with the enclosing environment saved previously
+  #      Match token arguments name to expression values and set then in the new env
+  #      executes block with function body and the new enviroments
+  #         evaluate every statement in the block with it's repective env using the interpreter methods
   def fun_declaration(kind)
     name = consume!(Token::Type::IDENTIFIER, "Expect #{kind} name.")
     consume!(Token::Type::LEFT_PAREN, "Expect, '( after #{kind} name.")
@@ -538,6 +560,7 @@ class Parser
   # function calls
   MAX_NUMBER_OF_ARGUMENTS = 255
   def call
+    # in the case of an actual call this would be an primary exp containing an identifier.
     exp = array_accessor
     # this is the same deal as the other expressions.
     # this while loop allows us to target ALL funtion calls in the expression
@@ -635,7 +658,7 @@ class Parser
       consume!(Token::Type::RIGHT_PAREN, "expected ) at #{peek.line}")
       return Expression::Grouping.new(exp)
     end
-# require 'pry'; binding.pry
+
     raise_error('Expected expression')
   end
 
