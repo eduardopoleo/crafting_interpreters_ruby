@@ -160,7 +160,6 @@ class Parser
 
   def block_statement
     # This one a bit weird because blocks are used to declare scopes in other places
-    # such as functions so that's why this one looks a bit weird
     Statement::Block.new(block)
   end
   
@@ -187,12 +186,8 @@ class Parser
   end
 
   def print_statement
-    # we advance to get to the actual token that we want to print
     value = expression
-    # if after all the expression has been resolved we do not have a semicolon fail
-    raise_error("expected ; at #{peek.line}") unless match?(Token::Type::SEMICOLON)
-    # we consume the semi colon token.
-    advance
+    consume!(Token::Type::SEMICOLON, "expected ; at #{peek.line}")
     Statement::Print.new(value)
   end
 
@@ -216,12 +211,9 @@ class Parser
   end
 
   def while_statement
-    raise_error("expected ( at #{peek.line}") unless match?(Token::Type::LEFT_PAREN)
-    advance
+    consume!(Token::Type::LEFT_PAREN, "expected ( at #{peek.line}")
     condition = expression
-
-    raise_error("expected ) at #{peek.line}") unless match?(Token::Type::RIGHT_PAREN)
-    advance
+    consume!(Token::Type::RIGHT_PAREN, "expected ) at #{peek.line}")
     body = declaration_or_statement
 
     Statement::While.new(condition, body)
@@ -293,12 +285,10 @@ class Parser
 
     # the at_end is to prevent infinite loops! if an } is never found the loop will
     # never exit!
-    while(!match?(Token::Type::RIGHT_BRACE) && !at_end?)
+    while(!check(Token::Type::RIGHT_BRACE) && !at_end?)
       statements << declaration_or_statement
     end
-
-    raise_error("Expected } at #{peek.line}") unless match?(Token::Type::RIGHT_BRACE)
-    advance
+    consume!(Token::Type::RIGHT_BRACE, "Expected } at #{peek.line}")
     statements
   end
 
@@ -351,9 +341,8 @@ class Parser
   def or_exp
     exp = and_exp
 
-    while(match?(Token::Type::KEYWORDS['or']))
-      operator = peek
-      advance
+    while(match!(Token::Type::KEYWORDS['or']))
+      operator = previous
       right = and_exp
       exp = Expression::Logical.new(exp, operator, right)
     end
@@ -364,9 +353,8 @@ class Parser
   def and_exp
     exp = equality
 
-    while(match?(Token::Type::KEYWORDS['and']))
-      operator = peek
-      advance
+    while(match!(Token::Type::KEYWORDS['and']))
+      operator = previous
       right = equality
       exp = Expression::Logical.new(exp, operator, right)
     end
@@ -382,12 +370,8 @@ class Parser
     # all the other symbols will get resolved in the higher precedence methods.
     # before you get back up. Then if you're here again it means that you're 
     # either done or that you stumble upon another  ==, !=
-    while match?([Token::Type::BANG_EQUAL, Token::Type::EQUAL_EQUAL]) do
-      # store the != 
-      operator = peek
-      # consume it
-      advance
-      # get ahold of the right end of the expression
+    while match!([Token::Type::BANG_EQUAL, Token::Type::EQUAL_EQUAL]) do
+      operator = previous
       right = comparison
       exp = Expression::Binary.new(exp, operator, right)
     end
@@ -399,14 +383,13 @@ class Parser
   def comparison
     exp = term
 
-    while match?([
+    while match!([
       Token::Type::GREATER,
       Token::Type::GREATER_EQUAL,
       Token::Type::LESS,
       Token::Type::LESS_EQUAL
     ]) do
-      operator = peek
-      advance
+      operator = previous
       right = term
       exp = Expression::Binary.new(exp, operator, right)
     end
@@ -421,12 +404,11 @@ class Parser
   def term
     exp = factor
 
-    while match?([
+    while match!([
       Token::Type::MINUS,
       Token::Type::PLUS
     ])
-      operator = peek
-      advance
+      operator = previous
       # Accumulates, as it accumulates expressions it stores them
       # accumulated exp get included to the left
       right = factor
@@ -496,13 +478,12 @@ class Parser
   def factor
     exp = unary
 
-    while match?([
+    while match!([
       Token::Type::SLASH,
       Token::Type::STAR,
       Token::Type::MODULO
     ]) do
-      operator = peek
-      advance
+      operator = previous
       right = unary
       exp = Expression::Binary.new(exp, operator, right)
     end
@@ -637,19 +618,6 @@ class Parser
     end
 
     raise_error('Expected expression')
-  end
-
-  ### utility methods ###
-  def match?(types)
-
-    return false if at_end?
-
-    types = Array(types)
-    types.each do |type|
-      return true if peek.type == type
-    end
-
-    false
   end
 
   def match!(types)
