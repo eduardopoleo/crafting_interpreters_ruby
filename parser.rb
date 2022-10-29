@@ -64,7 +64,7 @@ class Parser
       # If the loops below finish means that we're found the end of the statement
       # then the rest of the outstanding tokens are gonna be dump into a new statement
       while !at_end? do
-        statements << declaration # whatever is at the top of the grammar hierachy goes here.
+        statements << declaration_or_statement # whatever is at the top of the grammar hierachy goes here.
       end
       statements
     rescue Parser::ParseError => e
@@ -72,12 +72,23 @@ class Parser
     end
   end
 
-  def declaration
+  def declaration_or_statement
+    # Declarations
     return fun_declaration("function") if match!(Token::Type::KEYWORDS['fun'])
     return var_declaration if match!(Token::Type::KEYWORDS['var'])
     return class_declaration if match!(Token::Type::KEYWORDS['class'])
-  
-    statement
+
+    # Statements
+    return if_statement if match!(Token::Type::KEYWORDS['if'])
+    return print_statement if match!(Token::Type::KEYWORDS['print'])
+    return return_statement if match!(Token::Type::KEYWORDS['return'])
+    return break_statement if match!(Token::Type::KEYWORDS['break'])
+    return while_statement if match!(Token::Type::KEYWORDS['while'])
+    return for_statement if match!(Token::Type::KEYWORDS['for'])
+    return block_statement if match!(Token::Type::LEFT_BRACE)
+
+    # Expression
+    expression_statement
   end
 
   # Function life-cycle
@@ -123,6 +134,16 @@ class Parser
     Statement::Function.new(name, parameters, body)
   end
 
+  def var_declaration
+    name = consume!(Token::Type::IDENTIFIER, 'Expected var identifier')
+    initializer = nil
+    if match!(Token::Type::EQUAL)
+      initializer = expression
+    end
+    consume!(Token::Type::SEMICOLON, 'Expected ; to finish statement')
+    Statement::Var.new(name, initializer)
+  end
+
   def class_declaration
     name = consume!(Token::Type::IDENTIFIER, 'Expected class name')
     consume!(Token::Type::LEFT_BRACE, "Expect '{' before class body.")
@@ -137,66 +158,30 @@ class Parser
     return Statement::Class.new(name, methods)
   end
 
-  def statement
-    if match?(Token::Type::KEYWORDS['if'])
-      advance
-      return if_statement
-    end
-
-    if match?(Token::Type::KEYWORDS['print'])
-      advance
-      return print_statement
-    end
-
-    if match!(Token::Type::KEYWORDS['return'])
-      return return_statement
-    end
-
-    if match!(Token::Type::KEYWORDS['break'])
-      return break_statement
-    end
-
-    if match?(Token::Type::KEYWORDS['while'])
-      advance
-      return while_statement
-    end
-
-    if match?(Token::Type::KEYWORDS['for'])
-      advance
-      return for_statement
-    end
-
-    if match?(Token::Type::LEFT_BRACE)
-      advance
-      return Statement::Block.new(block)
-    end
-
-    expression_statement
+  def block_statement
+    # This one a bit weird because blocks are used to declare scopes in other places
+    # such as functions so that's why this one looks a bit weird
+    Statement::Block.new(block)
   end
   
   def if_statement
-    raise_error("Expected ( at #{peek.line}") unless match?(Token::Type::LEFT_PAREN)
-    advance
+    consume!(Token::Type::LEFT_PAREN, "Expected ( at #{peek.line}")
     condition = expression
-    raise_error("Expected ( at #{peek.line}") unless match?(Token::Type::RIGHT_PAREN)
-    advance
-    then_branch = statement
+    consume!(Token::Type::RIGHT_PAREN, "Expected ) at #{peek.line}")
+    then_branch = declaration_or_statement
 
     elif_statements = []
-    while match?(Token::Type::KEYWORDS['elif'])
-      advance
-      raise_error("Expected ( at #{peek.line}") unless match?(Token::Type::LEFT_PAREN)
-      advance
+    while match!(Token::Type::KEYWORDS['elif'])
+      consume!(Token::Type::LEFT_PAREN, "Expected ( at #{peek.line}")
       elif_condition = expression
-      raise_error("Expected ) at #{peek.line}") unless match?(Token::Type::RIGHT_PAREN)
-      advance
-      elif_branch = statement
+      consume!(Token::Type::RIGHT_PAREN, "Expected ) at #{peek.line}")
+      elif_branch = declaration_or_statement
       elif_statements << Statement::Elif.new(elif_condition, elif_branch)
     end
 
     other_branch = nil
     if match!(Token::Type::KEYWORDS['else'])
-      other_branch = statement
+      other_branch = declaration_or_statement
     end
     Statement::If.new(condition, then_branch, elif_statements, other_branch)
   end
@@ -237,7 +222,7 @@ class Parser
 
     raise_error("expected ) at #{peek.line}") unless match?(Token::Type::RIGHT_PAREN)
     advance
-    body = statement
+    body = declaration_or_statement
 
     Statement::While.new(condition, body)
   end
@@ -267,7 +252,7 @@ class Parser
       advance
       initializer = var_declaration
     else
-      initializer = expression_statement
+      initializer = expression
     end
 
     condition = nil
@@ -311,25 +296,19 @@ class Parser
     body
   end
 
+  # There's a subtlety here in the way 
   def block
     statements = []
 
     # the at_end is to prevent infinite loops! if an } is never found the loop will
     # never exit!
     while(!match?(Token::Type::RIGHT_BRACE) && !at_end?)
-      statements << declaration
+      statements << declaration_or_statement
     end
 
     raise_error("Expected } at #{peek.line}") unless match?(Token::Type::RIGHT_BRACE)
     advance
     statements
-  end
-
-  def expression_statement
-    exp = expression
-    raise_error("expected ; at #{peek.line}") unless match?(Token::Type::SEMICOLON)
-    advance
-    Statement::Expression.new(exp)
   end
 
   # The order of these are taking from the order of precedence in C
@@ -340,20 +319,16 @@ class Parser
   # Factor	/ *	Left
   # Unary	! -	Right
 
-  def var_declaration
-    raise_error('Expected var identifier') unless match?(Token::Type::IDENTIFIER)
-    name = peek
-    advance
-    initializer = nil
-    if match?(Token::Type::EQUAL)
-      advance
-      initializer = expression
-    end
-    raise_error('Expected ; to finish statement') unless match?(Token::Type::SEMICOLON)
-    advance
-    Statement::Var.new(name, initializer)
+  def expression_statement
+    exp = expression
+    consume!(Token::Type::SEMICOLON, "expected ; at #{peek.line}")
+    Statement::Expression.new(exp)
   end
 
+  # Sometimes we just need to evaluate the whole chain of expression
+  # without having to require returning an expression statement with ; at the end
+  # that's why we have this method. It's easier than having to remember that expression
+  # starts at assignment
   def expression
     assignment
   end
@@ -622,7 +597,6 @@ class Parser
       while !match!(Token::Type::STRING_END)
         expressions << expression
       end
-
       return Expression::StringGroup.new(expressions)
     end
 
