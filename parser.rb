@@ -329,7 +329,7 @@ class Parser
         name = exp.name
         return Expression::Assign.new(name, value)
       elsif exp.is_a?(Expression::Get)
-        return Expression::Set.new(get.object, get.name, value)
+        return Expression::Set.new(exp.object, exp.name, value)
       end
 
       raise_error("=, Invalid assignment target")

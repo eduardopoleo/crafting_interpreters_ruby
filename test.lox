@@ -4,4 +4,12 @@ class Bacon {
   }
 }
 
-Bacon().eat();
+var bacon = Bacon();
+
+bacon.color = "red";
+bacon.texture = "crispy";
+
+print bacon.color;
+print bacon.texture;
+
+bacon.eat();
