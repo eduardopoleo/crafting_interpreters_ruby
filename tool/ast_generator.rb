@@ -18,6 +18,8 @@ class AstGenerator
     'assign'      => ['name', 'value'],
     'binary'      => ['left', 'operator', 'right'],
     'call'        => ['callee', 'paren', 'arguments'],
+    'get'         => ['object', 'name'],
+    'set'         => ['object', 'name', 'value'],
     'grouping'    => ['expression'],
     'literal'     => ['value'],
     'logical'     => ['left', 'operator', 'right'],

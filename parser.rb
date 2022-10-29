@@ -23,7 +23,7 @@ require_relative './statement'
 # whileStm        → "while" "(" expression ")" statement
 
 # expression      → equality ;
-# assignment      → IDENTIFIER "=" assignment | logic_or;
+# assignment      → (call ".")? IDENTIFIER "=" assignment | logic_or;
 # logic_or        → logic_and ("or" logic_and)*;
 # logic_and       → equality ("and" equality)*;
 # equality        → comparison ( ( "!=" | "==" ) comparison )* ;
@@ -31,7 +31,7 @@ require_relative './statement'
 # term            → factor ( ( "-" | "+" ) factor )* ;
 # factor          → unary ( ( "/" | "*" | "%" ) unary )* ;
 # unary           → ( "!" | "-" ) unary | call ;
-# call            → primary ( "(" arguments? ")")*
+# call            → primary ( "(" arguments? ")" | .IDENTIFER)* 
 # arguments       → expression ( "," expression)*;
 # array           → "[" ( "," expression)*? "]"
 # primary         → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | "[" ("," expression)*? "]" | IDENTIFIER;
@@ -364,15 +364,16 @@ class Parser
   def assignment
     exp = or_exp
 
-    if match?(Token::Type::EQUAL)
-      equals = peek
-      advance
+    if match!(Token::Type::EQUAL)
+      equals = previous
       # This recursion loop ensures that this becomes right associative
       value = assignment
 
       if exp.is_a?(Expression::Variable)
         name = exp.name
         return Expression::Assign.new(name, value)
+      elsif exp.is_a?(Expression::Get)
+        return Expression::Set.new(get.object, get.name, value)
       end
 
       raise_error("=, Invalid assignment target")
@@ -564,20 +565,31 @@ class Parser
     exp = array_accessor
     # this is the same deal as the other expressions.
     # this while loop allows us to target ALL funtion calls in the expression
-    while match!(Token::Type::LEFT_PAREN)
-      arguments = []
-      if !check(Token::Type::RIGHT_PAREN)
-        # Iterate until you run out of commas the first loop does not require a comma.
-        begin
-          raise_error("Too many arguments at #{peek.line}") if arguments.size >= MAX_NUMBER_OF_ARGUMENTS
-          arguments << expression
-        end while(match!(Token::Type::COMMA))
+    while true
+      if match!(Token::Type::LEFT_PAREN)
+        arguments = []
+        if !check(Token::Type::RIGHT_PAREN)
+          # Iterate until you run out of commas the first loop does not require a comma.
+          begin
+            raise_error("Too many arguments at #{peek.line}") if arguments.size >= MAX_NUMBER_OF_ARGUMENTS
+            arguments << expression
+          end while(match!(Token::Type::COMMA))
+        end
+        consume!(Token::Type::RIGHT_PAREN, "Expected ) at #{peek.line}")
+        # Current token contains the closing param
+        exp = Expression::Call.new(exp, previous, arguments)
+      elsif match!(Token::Type::DOT)
+        name = consume!(Token::Type::IDENTIFIER, "Expected property name after .")
+        # exp in this case corresponds to the object you're calling . on.
+        # object.name. You need to evaluate all the exp before you to know
+        # what are you gonna evaluate the "." against.
+        exp = Expression::Get.new(exp, name)
+      else
+        break
       end
-
-      consume!(Token::Type::RIGHT_PAREN, "Expected ) at #{peek.line}")
-      # Current token contains the closing param
-      exp = Expression::Call.new(exp, previous, arguments)
     end
+    # I think this algo allows for things like (arg1, arg2)(arg3, arg4).prop1(arg5, arg6)?
+    # todo study this.
     exp
   end
 

@@ -42,6 +42,33 @@ class Expression
     end
   end
 
+  class Get
+    attr_reader :object, :name
+
+    def initialize(object, name)
+      @object = object
+      @name = name
+    end
+
+    def accept(visitor)
+      visitor.visit_get(self)
+    end
+  end
+
+  class Set
+    attr_reader :object, :name, :value
+
+    def initialize(object, name, value)
+      @object = object
+      @name = name
+      @value = value
+    end
+
+    def accept(visitor)
+      visitor.visit_set(self)
+    end
+  end
+
   class Grouping
     attr_reader :expression
 

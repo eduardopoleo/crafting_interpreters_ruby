@@ -17,9 +17,9 @@ class Resolver
   end
 
   def visit_block(block)
-    begin_scope
-    resolve_multiple(block.statements)
-    end_scope
+    wrap_scope do
+      resolve_multiple(block.statements)
+    end
     return nil
   end
 
@@ -160,6 +160,21 @@ class Resolver
   def visit_class(klass)
     declare(klass.name)
     define(klass.name)
+
+    klass.methods.each do |method|
+      resolve_function(method)
+    end
+    nil
+  end
+
+  def visit_get(get_exp)
+    resolve(get_exp.object)
+    nil
+  end
+
+  def visit_set(set_exp)
+    resolve(set_exp.value)
+    resolve(set_exp.object)
     nil
   end
 
@@ -181,11 +196,9 @@ class Resolver
     scopes[-1][name.lexeme] = true
   end
 
-  def begin_scope
+  def wrap_scope
     scopes << {}
-  end
-
-  def end_scope
+    yield
     scopes.pop
   end
 
@@ -198,12 +211,12 @@ class Resolver
   end
 
   def resolve_function(function)
-    begin_scope
-    function.params.each do |param|
-      declare(param)
-      define(param)
+    wrap_scope do
+      function.params.each do |param|
+        declare(param)
+        define(param)
+      end
+      resolve_multiple(function.body)
     end
-    resolve_multiple(function.body)
-    end_scope
   end
 end

@@ -309,8 +309,33 @@ class Interpreter
   end
 
   def visit_class(klass_statement)
-    klass = LoxClass.new(klass_statement.name.lexeme)
-    environment.define(klass_statement.name.lexeme, klass)
+    environment.define(klass_statement.name.lexeme, nil)
+    methods = {}
+    klass_statement.methods.each do |method|
+      function = LoxFunction.new(method, environment)
+      methods[method.name.lexeme] = function
+    end
+    klass = LoxClass.new(klass_statement.name.lexeme, methods)
+    # this is weird why we use the token here and not the lexeme
+    # why do we do the define and the assing in two steps?
+    environment.assign(klass_statement.name.lexeme, klass)
+  end
+
+  def visit_get(get)
+    object = evaluate(get.object)
+    return object.get(get.name) if object.is_a?(LoxInstance)
+    raise RuntimeError.new(get.name, "Only Instance have properties.")
+  end
+
+  def visit_set(set)
+    object = evaluate(set.object)
+    if !object.is_a?(LoxInstance)
+      raise RuntimeError.new(set.name, "Only Instance have properties.")
+    end
+
+    value = evaluate(set.value)
+    object.set(set.name, value)
+    return value
   end
 
   def evaluate(statement)
