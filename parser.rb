@@ -634,6 +634,9 @@ class Parser
     false
   end
 
+  # It's used when we do not want to burn the token just yet
+  # most likely because we want to consume! later and throw an error
+  # in case we do not see it.
   def check(types)
     types = Array(types)
 
