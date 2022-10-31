@@ -523,11 +523,12 @@ class Parser
           end while(match!(Token::Type::COMMA))
         end
         consume!(Token::Type::RIGHT_PAREN, "Expected ) at #{peek.line}")
-        # Current token contains the closing param
+        # exp contains the identifier and the expressions that evaluate to args
         exp = Expression::Call.new(exp, previous, arguments)
       elsif match!(Token::Type::DOT)
         name = consume!(Token::Type::IDENTIFIER, "Expected property name after .")
-        # exp in this case corresponds to the object you're calling . on.
+        # exp in this case corresponds to the object you're calling . on which is an 
+        # identifier
         # object.name. You need to evaluate all the exp before you to know
         # what are you gonna evaluate the "." against.
         exp = Expression::Get.new(exp, name)
@@ -580,25 +581,12 @@ class Parser
       return exp
     end
 
-    if match!([Token::Type::NUMBER, Token::Type::STRING_LIT])
-      return Expression::Literal.new(previous.literal)
-    end
-
-    if match!(Token::Type::KEYWORDS['true'])
-      return Expression::Literal.new(true) 
-    end
-
-    if match!(Token::Type::KEYWORDS['false'])
-      return Expression::Literal.new(false)
-    end
-
-    if match!(Token::Type::IDENTIFIER)
-      return Expression::Variable.new(previous)
-    end
-
-    if match!(Token::Type::KEYWORDS['nil'])
-      return Expression::Literal.new(nil) 
-    end
+    return Expression::Literal.new(previous.literal) if match!([Token::Type::NUMBER, Token::Type::STRING_LIT])
+    return Expression::Literal.new(true) if match!(Token::Type::KEYWORDS['true'])
+    return Expression::Literal.new(false) if match!(Token::Type::KEYWORDS['false'])
+    return Expression::This.new(previous) if match!(Token::Type::KEYWORDS['this'])
+    return Expression::Variable.new(previous) if match!(Token::Type::IDENTIFIER)
+    return Expression::Literal.new(nil)  if match!(Token::Type::KEYWORDS['nil'])
 
     if match!(Token::Type::LEFT_SQUARE)
       elements = []

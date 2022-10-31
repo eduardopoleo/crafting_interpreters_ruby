@@ -39,6 +39,7 @@ class Lox
     interpreter = Interpreter.new
     # Stores the result on the interpreter's locals
     Resolver.new(interpreter).resolve_multiple(statements)
+
     interpreter.interpret(statements)
   end
 

@@ -13,6 +13,15 @@ class LoxFunction < LoxCallable
     declaration.params.size
   end
 
+  def bind(instance)
+    enviroment = Environment.new(closure)
+    enviroment.define('this', instance)
+    # This seems like a stupid indirection
+    # why don't we just bind this to the closure directly when extract
+    # the method from the instace get?
+    self.class.new(declaration, enviroment)
+  end
+
   def call(interpreter, arguments)
     environment = Environment.new(closure)
     for i in 0...declaration.params.size

@@ -120,6 +120,18 @@ class Expression
     end
   end
 
+  class This
+    attr_reader :keyword
+
+    def initialize(keyword)
+      @keyword = keyword
+    end
+
+    def accept(visitor)
+      visitor.visit_this(self)
+    end
+  end
+
   class Variable
     attr_reader :name
 

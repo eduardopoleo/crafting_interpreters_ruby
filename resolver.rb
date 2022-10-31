@@ -161,8 +161,12 @@ class Resolver
     declare(klass.name)
     define(klass.name)
 
-    klass.methods.each do |method|
-      resolve_function(method)
+    wrap_scope do
+      scopes[-1]['this'] = true
+
+      klass.methods.each do |method|
+        resolve_function(method)
+      end
     end
     nil
   end
@@ -176,6 +180,11 @@ class Resolver
     resolve(set_exp.value)
     resolve(set_exp.object)
     nil
+  end
+
+  def visit_this(this_exp)
+    resolve_local(this_exp, this_exp.keyword)
+    return nil
   end
 
   private

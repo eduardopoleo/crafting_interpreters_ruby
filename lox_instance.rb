@@ -9,7 +9,7 @@ class LoxInstance
   def get(name)
     return fields[name.lexeme] if fields[name.lexeme]
     method = klass.find_method(name.lexeme)
-    return method if !method.nil?
+    return method.bind(self) if !method.nil?
 
     raise "Undefined property #{name}."
   end

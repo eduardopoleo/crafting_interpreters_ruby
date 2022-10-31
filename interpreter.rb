@@ -72,26 +72,6 @@ class Interpreter
     nil
   end
 
-  def visit_call(call_exp)
-    # this actually evaluates to visit_variable
-    # which in turn fetches the value of the callable (class or function)
-    # from the environment
-    callee = evaluate(call_exp.callee)
-    arguments = []
-    call_exp.arguments.each { |arg| arguments << evaluate(arg) }
-
-    if !callee.is_a?(LoxCallable)
-      raise RuntimeError.new(call_exp.paren, "Can only call functions and classes.")
-    end
-
-    if call_exp.arguments.size != callee.arity
-      raise RuntimeError.new(call_exp.paren,
-        "Expected #{callee.arity} arguments but got #{call_exp.arguments.size}."
-      )
-    end
-    return callee.call(self, arguments);
-  end
-
   def visit_logical(exp)
     left = evaluate(exp.left)
 
@@ -146,6 +126,60 @@ class Interpreter
     # if a value was defined in the enclosing envs it will be read
     function = LoxFunction.new(function_statement, environment)
     environment.define(function_statement.name.lexeme, function)
+  end
+
+  def visit_class(klass_statement)
+    environment.define(klass_statement.name.lexeme, nil)
+    methods = {}
+    klass_statement.methods.each do |method|
+      function = LoxFunction.new(method, environment)
+      methods[method.name.lexeme] = function
+    end
+    klass = LoxClass.new(klass_statement.name.lexeme, methods)
+    # this is weird why we use the token here and not the lexeme
+    # why do we do the define and the assing in two steps?
+    environment.assign(klass_statement.name.lexeme, klass)
+  end
+
+  def visit_call(call_exp)
+    # this actually evaluates to visit_variable
+    # which in turn fetches the value of the callable (class or function)
+    # from the environment
+    callee = evaluate(call_exp.callee)
+    arguments = []
+    call_exp.arguments.each { |arg| arguments << evaluate(arg) }
+
+    if !callee.is_a?(LoxCallable)
+      raise RuntimeError.new(call_exp.paren, "Can only call functions and classes.")
+    end
+
+    if call_exp.arguments.size != callee.arity
+      raise RuntimeError.new(call_exp.paren,
+        "Expected #{callee.arity} arguments but got #{call_exp.arguments.size}."
+      )
+    end
+    return callee.call(self, arguments);
+  end
+
+  def visit_get(get)
+    object = evaluate(get.object)
+    return object.get(get.name) if object.is_a?(LoxInstance)
+    raise RuntimeError.new(get.name, "Only Instance have properties.")
+  end
+
+  def visit_set(set)
+    object = evaluate(set.object)
+    if !object.is_a?(LoxInstance)
+      raise RuntimeError.new(set.name, "Only Instance have properties.")
+    end
+
+    value = evaluate(set.value)
+    object.set(set.name, value)
+    return value
+  end
+
+  def visit_this(this)
+    look_up_var(this, this.keyword)
   end
 
   def visit_print(print_statement)
@@ -275,12 +309,16 @@ class Interpreter
   end
 
   def visit_variable(expression)
+    look_up_var(expression, expression.name)
+  end
+
+  def look_up_var(expression, name)
     distance = locals[expression]
 
     if distance != nil
-      return environment.get_at(distance, expression.name.lexeme)
+      return environment.get_at(distance, name.lexeme)
     else
-      return globals.get(expression.name.lexeme)
+      return globals.get(name.lexeme)
     end
   end
 
@@ -306,36 +344,6 @@ class Interpreter
     end
 
     string
-  end
-
-  def visit_class(klass_statement)
-    environment.define(klass_statement.name.lexeme, nil)
-    methods = {}
-    klass_statement.methods.each do |method|
-      function = LoxFunction.new(method, environment)
-      methods[method.name.lexeme] = function
-    end
-    klass = LoxClass.new(klass_statement.name.lexeme, methods)
-    # this is weird why we use the token here and not the lexeme
-    # why do we do the define and the assing in two steps?
-    environment.assign(klass_statement.name.lexeme, klass)
-  end
-
-  def visit_get(get)
-    object = evaluate(get.object)
-    return object.get(get.name) if object.is_a?(LoxInstance)
-    raise RuntimeError.new(get.name, "Only Instance have properties.")
-  end
-
-  def visit_set(set)
-    object = evaluate(set.object)
-    if !object.is_a?(LoxInstance)
-      raise RuntimeError.new(set.name, "Only Instance have properties.")
-    end
-
-    value = evaluate(set.value)
-    object.set(set.name, value)
-    return value
   end
 
   def evaluate(statement)
