@@ -7,22 +7,18 @@ class Resolver
   end
 
   def resolve_multiple(stms_or_exps)
-    stms_or_exps.each do |stm_or_exp|
-      resolve(stm_or_exp)
-    end
+    stms_or_exps.each { |stm_or_exp| resolve(stm_or_exp) }
   end
 
   def resolve(stm_or_exp)
     stm_or_exp.accept(self)
   end
 
-  def visit_block(block)
-    wrap_scope do
-      resolve_multiple(block.statements)
-    end
-    return nil
-  end
-
+  ### Correct Declaration ###
+  # This one in particular is the first use case of the resolver
+  # verify that if we do something like var a = a; we error out
+  # We verify that variable is not resolved before var has been by
+  # means of tracking down the declare / define.
   def visit_var(var)
     declare(var.name)
     if var.initializer != nil
@@ -30,6 +26,63 @@ class Resolver
     end
 
     define(var.name)
+    return nil
+  end
+
+  #### Wrap scopes ###
+  # This is the seconde main use case. To keep track of the context nested levels
+  # class, functions, blocks, are the main components that change the scope in the code
+  # so we add a new scope level to the stack when we encounter one of these.
+  def visit_class(klass)
+    declare(klass.name)
+    define(klass.name)
+
+    wrap_scope do
+      scopes[-1]['this'] = true
+
+      klass.methods.each do |method|
+        resolve_function(method)
+      end
+    end
+    nil
+  end
+ 
+  def visit_function(function)
+    declare(function.name)
+    define(function.name)
+
+    resolve_function(function)
+    return nil
+  end
+
+  def resolve_function(function)
+    wrap_scope do
+      function.params.each do |param|
+        declare(param)
+        define(param)
+      end
+      resolve_multiple(function.body)
+    end
+  end
+  
+  def visit_block(block)
+    wrap_scope do
+      resolve_multiple(block.statements)
+    end
+    return nil
+  end
+
+  # Assign resolve local because it needs to SET the
+  # variable value at the right scope
+  def visit_assign(exp)
+    resolve(exp.value)
+    resolve_local(exp, exp.name)
+    return nil
+  end
+
+  # Visit and variable needs to FETCH the var value at the right value
+  def visit_this(this_exp)
+    resolve_local(this_exp, this_exp.keyword)
     return nil
   end
 
@@ -46,18 +99,12 @@ class Resolver
     return nil
   end
 
-  def visit_assign(exp)
-    resolve(exp.value)
-    resolve_local(exp, exp.name)
-    return nil
-  end
-
-  def visit_function(function)
-    declare(function.name)
-    define(function.name)
-
-    resolve_function(function)
-    return nil
+  def resolve_local(exp, name)
+    (scopes.size - 1).downto(0) do |i|
+      if scopes[i].has_key?(name.lexeme)
+        interpreter.resolve(exp, scopes.size - 1 - i)
+      end
+    end
   end
 
   def visit_expression(expression_statement)
@@ -68,7 +115,8 @@ class Resolver
   def visit_if(if_statement)
     resolve(if_statement.condition)
     resolve(if_statement.then_branch)
-    if_statement.elif_statements.each do |stm| resolve(stm)
+    if_statement.elif_statements.each do |stm|
+      resolve(stm)
       resolve(stm.condition)
       resolve(stm.branch)
     end
@@ -157,20 +205,6 @@ class Resolver
 
   def visit_break(_break); end # noop
 
-  def visit_class(klass)
-    declare(klass.name)
-    define(klass.name)
-
-    wrap_scope do
-      scopes[-1]['this'] = true
-
-      klass.methods.each do |method|
-        resolve_function(method)
-      end
-    end
-    nil
-  end
-
   def visit_get(get_exp)
     resolve(get_exp.object)
     nil
@@ -182,25 +216,22 @@ class Resolver
     nil
   end
 
-  def visit_this(this_exp)
-    resolve_local(this_exp, this_exp.keyword)
-    return nil
-  end
-
   private
 
   def declare(name)
     return if scopes.empty?
     scope = scopes[-1]
-
+    
     if scope.has_key?(name.lexeme)
       raise "Already a var in the scope with this name"
     end
-
+    
+    # declares the var on the outer scope
     scope[name.lexeme] = false    
   end
 
   def define(name)
+    # defines the variable on the outer scope
     return if scopes.empty?
     scopes[-1][name.lexeme] = true
   end
@@ -209,23 +240,5 @@ class Resolver
     scopes << {}
     yield
     scopes.pop
-  end
-
-  def resolve_local(exp, name)
-    (scopes.size - 1).downto(0) do |i|
-      if scopes[i].has_key?(name.lexeme)
-        interpreter.resolve(exp, scopes.size - 1 - i)
-      end
-    end
-  end
-
-  def resolve_function(function)
-    wrap_scope do
-      function.params.each do |param|
-        declare(param)
-        define(param)
-      end
-      resolve_multiple(function.body)
-    end
   end
 end

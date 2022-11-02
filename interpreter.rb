@@ -105,6 +105,7 @@ class Interpreter
     value = evaluate(exp.value)
     distance = locals[exp]
 
+    # Go up the chain of enclosing and set the value there
     if distance.nil?
       globals.assign(exp.name.lexeme, value)
     else

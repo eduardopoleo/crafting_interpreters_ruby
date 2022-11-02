@@ -38,6 +38,9 @@ class Lox
     statements = Parser.parse(tokens)
     interpreter = Interpreter.new
     # Stores the result on the interpreter's locals
+    # if we comment this out for example everything that requires resolve locals
+    # variable, assign or this. will fail cuz the interpreter will try to fetch
+    # the resolved value from the locals and wont' find it.
     Resolver.new(interpreter).resolve_multiple(statements)
 
     interpreter.interpret(statements)
