@@ -125,7 +125,8 @@ class Interpreter
     # This creates a nested "chain" of enviroments
     # given that env.get searches the enclosing env this ensures that
     # if a value was defined in the enclosing envs it will be read
-    function = LoxFunction.new(function_statement, environment)
+    # is_initializer will always be false in this case. This is just a regular function
+    function = LoxFunction.new(function_statement, environment, false)
     environment.define(function_statement.name.lexeme, function)
   end
 
@@ -133,7 +134,7 @@ class Interpreter
     environment.define(klass_statement.name.lexeme, nil)
     methods = {}
     klass_statement.methods.each do |method|
-      function = LoxFunction.new(method, environment)
+      function = LoxFunction.new(method, environment, method.name.lexeme == 'this')
       methods[method.name.lexeme] = function
     end
     klass = LoxClass.new(klass_statement.name.lexeme, methods)
@@ -162,6 +163,7 @@ class Interpreter
     return callee.call(self, arguments);
   end
 
+  # .field -> .method()
   def visit_get(get)
     object = evaluate(get.object)
     return object.get(get.name) if object.is_a?(LoxInstance)

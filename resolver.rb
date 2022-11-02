@@ -1,10 +1,11 @@
 class Resolver
-  attr_reader :interpreter, :scopes, :current_class
+  attr_reader :interpreter, :scopes, :current_class, :current_function
 
   def initialize(interpreter)
     @interpreter = interpreter
     @scopes = []
     @current_class = 'NONE'
+    @current_function = 'NONE'
   end
 
   def resolve_multiple(stms_or_exps)
@@ -45,7 +46,9 @@ class Resolver
       scopes[-1]['this'] = true
 
       klass.methods.each do |method|
-        resolve_function(method)
+        declaration = 'METHOD'
+        declaration = 'INITIALIZER' if method.name.lexeme == 'init'
+        resolve_function(method, declaration)
       end
     end
 
@@ -61,7 +64,10 @@ class Resolver
     return nil
   end
 
-  def resolve_function(function)
+  def resolve_function(function, declaration)
+    enclosing_function = current_function
+    @current_function = declaration
+
     wrap_scope do
       function.params.each do |param|
         declare(param)
@@ -69,6 +75,8 @@ class Resolver
       end
       resolve_multiple(function.body)
     end
+
+    @current_function = enclosing_function
   end
   
   def visit_block(block)
@@ -138,7 +146,10 @@ class Resolver
 
   def visit_return(return_statement)
     if return_statement.value != nil
-      resolve(return_statement.value)
+      if current_function == 'INITIALIZER'
+        raise "Can't return from initializers"
+        resolve(return_statement.value)
+      end
     end
 
     return nil

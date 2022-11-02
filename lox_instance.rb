@@ -6,6 +6,7 @@ class LoxInstance
     @fields = {}
   end
 
+  # .field or .method() -> will be followed by a call exp.
   def get(name)
     return fields[name.lexeme] if fields[name.lexeme]
     method = klass.find_method(name.lexeme)
