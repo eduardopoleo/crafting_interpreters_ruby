@@ -1,9 +1,10 @@
 class Resolver
-  attr_reader :interpreter, :scopes
+  attr_reader :interpreter, :scopes, :current_class
 
   def initialize(interpreter)
     @interpreter = interpreter
     @scopes = []
+    @current_class = 'NONE'
   end
 
   def resolve_multiple(stms_or_exps)
@@ -34,6 +35,9 @@ class Resolver
   # class, functions, blocks, are the main components that change the scope in the code
   # so we add a new scope level to the stack when we encounter one of these.
   def visit_class(klass)
+    enclosing_class = current_class
+    @current_class = 'CLASS'
+
     declare(klass.name)
     define(klass.name)
 
@@ -44,6 +48,8 @@ class Resolver
         resolve_function(method)
       end
     end
+
+    @current_class = enclosing_class
     nil
   end
  
@@ -82,6 +88,7 @@ class Resolver
 
   # Visit and variable needs to FETCH the var value at the right value
   def visit_this(this_exp)
+    raise "Cant' use 'this' outside of a class" if current_class == 'NONE'
     resolve_local(this_exp, this_exp.keyword)
     return nil
   end
