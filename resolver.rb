@@ -169,7 +169,6 @@ class Resolver
 
   def visit_call(call)
     resolve(call.callee)
-
     call.arguments.each do |arg|
       resolve(arg)
     end

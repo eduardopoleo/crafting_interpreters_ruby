@@ -1,11 +1,22 @@
-// print this;
-class Cake {
-  taste() {
-    var adjective = "delicious";
-    print "The " + this.flavor + " cake is " + adjective + "!";
+class Breakfast {
+  init(meat, bread) {
+    this.meat = meat;
+    this.bread = bread;
   }
+
+  serve(who) {
+    print "Enjoy your " + this.meat + " and " +
+        this.bread + ", " + who + ".";
+  }
+
 }
 
-var cake = Cake();
-cake.flavor = "German chocolate";
-cake.taste();
+var baconAndToast = Breakfast("bacon", "toast");
+baconAndToast.serve("Dear Reader");
+
+// class Breakfast {
+
+// }
+
+// var baconAndToast = Breakfast();
+// print baconAndToast;

@@ -19,6 +19,8 @@ class LoxClass < LoxCallable
     if !initializer.nil?
       initializer.bind(instance).call(interpreter, arguments)
     end
+    
+    instance
   end
 
   def arity
