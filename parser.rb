@@ -7,7 +7,7 @@ require_relative './statement'
 
 # declaration     → fucDecl | var_declaration | statement | classDecl
 
-# classDeck       → "class" IDENTIFIER "{" function "}"
+# classDecl       → "class" IDENTIFIER ("<" IDENTIFIER) "{" function "}"
 # fucDecl         → "fun" function;
 # function        → IDENTIFIER "(" parameters? ")" block;
 # parameters      → IDENTIFIER ("," IDENTIFIER)*;
@@ -146,6 +146,15 @@ class Parser
 
   def class_declaration
     name = consume!(Token::Type::IDENTIFIER, 'Expected class name')
+    superclass = nil
+
+    if match!(Token::Type::LESS)
+      superclass_token = consume!(Token::Type::IDENTIFIER, 'Expect superclass name')
+      # Requires being in a Variable so that it can be resolve to the actual class
+      # through the interpreter etc
+      superclass = Expression::Variable.new(superclass_token)
+    end
+
     consume!(Token::Type::LEFT_BRACE, "Expect '{' before class body.")
     methods = []
 
@@ -155,7 +164,7 @@ class Parser
 
     consume!(Token::Type::RIGHT_BRACE, "Expect '}', after class body")
 
-    return Statement::Class.new(name, methods)
+    return Statement::Class.new(name, superclass, methods)
   end
 
   def block_statement

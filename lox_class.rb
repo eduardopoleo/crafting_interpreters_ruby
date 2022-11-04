@@ -1,16 +1,23 @@
 require_relative './lox_instance'
 
 class LoxClass < LoxCallable
-  attr_reader :name, :methods, :initializer
+  attr_reader :name, :methods, :initializer, :superclass
 
-  def initialize(name, methods)
+  def initialize(name, superclass, methods)
     @name = name
     @methods = methods
+    @superclass = superclass
     @initializer = find_method('init')
   end
 
   def find_method(name)
-    methods[name]
+    return methods[name] if methods[name]
+
+    if superclass
+      return superclass.find_method(name)
+    end
+
+    nil
   end
 
   def call(interpreter, arguments)

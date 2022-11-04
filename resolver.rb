@@ -42,6 +42,14 @@ class Resolver
     declare(klass.name)
     define(klass.name)
 
+    if !klass.superclass.nil? && klass.name.lexeme == klass.superclass.name.lexeme
+      raise "A class cant' inherit from itself"
+    end
+
+    if !klass.superclass.nil?
+      resolve(klass.superclass)
+    end
+
     wrap_scope do
       scopes[-1]['this'] = true
 

@@ -100,7 +100,21 @@ class Interpreter
 
     nil
   end
+
+  # var a = 'hello'
+  # defines a new var in the env
+  def visit_var(statement)
+    value = nil
+    if !statement.initializer.nil?
+      value = evaluate(statement.initializer)
+    end
+
+    environment.define(statement.name.lexeme, value)
+    nil
+  end
   
+  # a = '5'
+  # assigns the value to the correct entry in the environment chain
   def visit_assign(exp)
     value = evaluate(exp.value)
     distance = locals[exp]
@@ -121,6 +135,24 @@ class Interpreter
     nil
   end
 
+  def visit_variable(expression)
+    look_up_var(expression, expression.name)
+  end
+
+  def look_up_var(expression, name)
+    distance = locals[expression]
+    if distance != nil
+      return environment.get_at(distance, name.lexeme)
+    else
+      return globals.get(name.lexeme)
+    end
+  end
+
+  def visit_this(this)
+    look_up_var(this, this.keyword)
+  end
+
+  # Defines the function in the current environment
   def visit_function(function_statement)
     # This creates a nested "chain" of enviroments
     # given that env.get searches the enclosing env this ensures that
@@ -130,14 +162,27 @@ class Interpreter
     environment.define(function_statement.name.lexeme, function)
   end
 
+  # defines a class in the current environment
   def visit_class(klass_statement)
+    superclass = nil
+
+    if !klass_statement.superclass.nil?
+      superclass = evaluate(klass_statement.superclass)
+      if !superclass.is_a?(LoxClass)
+        raise RuntimeError.new(
+          klass_statement.superclass.name,
+          "Superclass must be a class"
+        )
+      end
+    end
+
     environment.define(klass_statement.name.lexeme, nil)
     methods = {}
     klass_statement.methods.each do |method|
       function = LoxFunction.new(method, environment, method.name.lexeme == 'this')
       methods[method.name.lexeme] = function
     end
-    klass = LoxClass.new(klass_statement.name.lexeme, methods)
+    klass = LoxClass.new(klass_statement.name.lexeme, superclass, methods)
     # this is weird why we use the token here and not the lexeme
     # why do we do the define and the assing in two steps?
     environment.assign(klass_statement.name.lexeme, klass)
@@ -181,10 +226,6 @@ class Interpreter
     return value
   end
 
-  def visit_this(this)
-    look_up_var(this, this.keyword)
-  end
-
   def visit_print(print_statement)
     value = evaluate(print_statement.expression)
     puts value
@@ -209,26 +250,6 @@ class Interpreter
   end
 
   def execute_block(statements, block_environment)
-    # the interpreter is the evaluator. Eveything gets evaluated based on the
-    # environment of the interpreter. This env gets resetted every time right
-    # before a function call. After the function / block is executed we restore
-    # back the env
-    #
-    # fun functionA(a) {
-    #   print a;
-    # }
-
-    # fun functionB(n) {
-    #   functionA(4);
-    #   print n;
-    # }
-
-    # functionB(2);
-
-    # call functionB   => GlobEnv -> EnvB
-    # call functionA   => EnvB -> EnvA
-    # finish functionA => EnvA -> EnvB
-    # finish functionB => EnvB -> GlobEnv
     previous_environment = @environment
     begin
       @environment = block_environment
@@ -298,30 +319,6 @@ class Interpreter
       -right
     when Token::Type::BANG # Weird thing.
       !right
-    end
-  end
-
-  def visit_var(statement)
-    value = nil
-    if !statement.initializer.nil?
-      value = evaluate(statement.initializer)
-    end
-
-    environment.define(statement.name.lexeme, value)
-    nil
-  end
-
-  def visit_variable(expression)
-    look_up_var(expression, expression.name)
-  end
-
-  def look_up_var(expression, name)
-    distance = locals[expression]
-
-    if distance != nil
-      return environment.get_at(distance, name.lexeme)
-    else
-      return globals.get(name.lexeme)
     end
   end
 

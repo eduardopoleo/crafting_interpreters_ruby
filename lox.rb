@@ -42,7 +42,6 @@ class Lox
     # variable, assign or this. will fail cuz the interpreter will try to fetch
     # the resolved value from the locals and wont' find it.
     Resolver.new(interpreter).resolve_multiple(statements)
-
     interpreter.interpret(statements)
   end
 
