@@ -46,7 +46,10 @@ class Resolver
       raise "A class cant' inherit from itself"
     end
 
+    
     if klass.superclass
+      @current_class = 'SUBCLASS'
+      resolve(klass.superclass)
       scopes << {}
       scopes[-1]["super"] = true
     end
@@ -67,6 +70,12 @@ class Resolver
   end
 
   def visit_super(super_exp)
+    if @current_class == 'NONE'
+      raise "Can't use super outside super class"
+    elsif @current_class != 'SUBCLASS'
+      raise "Can't use 'super' in a class with no superclass."
+    end
+
     resolve_local(super_exp, super_exp.keyword)
     nil
   end
