@@ -20,6 +20,7 @@ class AstGenerator
     'call'        => ['callee', 'paren', 'arguments'],
     'get'         => ['object', 'name'],
     'set'         => ['object', 'name', 'value'],
+    'super'       => ['keyword', 'method'],
     'grouping'    => ['expression'],
     'literal'     => ['value'],
     'logical'     => ['left', 'operator', 'right'],

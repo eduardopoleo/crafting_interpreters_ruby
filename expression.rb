@@ -69,6 +69,19 @@ class Expression
     end
   end
 
+  class Super
+    attr_reader :keyword, :method
+
+    def initialize(keyword, method)
+      @keyword = keyword
+      @method = method
+    end
+
+    def accept(visitor)
+      visitor.visit_super(self)
+    end
+  end
+
   class Grouping
     attr_reader :expression
 

@@ -1,7 +1,7 @@
 require_relative './expression'
 require_relative './statement'
 
-# Recursive Descent based on this rules
+# Recursive Descent based on these rules
 
 # program         → statement* EOF ;
 
@@ -34,7 +34,7 @@ require_relative './statement'
 # call            → primary ( "(" arguments? ")" | .IDENTIFER)* 
 # arguments       → expression ( "," expression)*;
 # array           → "[" ( "," expression)*? "]"
-# primary         → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | "[" ("," expression)*? "]" | IDENTIFIER;
+# primary         → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | "[" ("," expression)*? "]" | IDENTIFIER | "super" "." IDENTIFIER;
 
 # convers a "dumb" list sequential tokens into expressions
 # - each experession corresponds to a legal operation
@@ -588,6 +588,13 @@ class Parser
       consume!(Token::Type::STRING_INT_END, "Expected string inter } tag")
 
       return exp
+    end
+
+    if match!(Token::Type::KEYWORDS['super'])
+      keyword = previous
+      consume!(Token::Type::DOT, "Expect . after super")
+      method = consume!(Token::Type::IDENTIFIER, "Expected identifier when calling super")
+      return Expression::Super.new(keyword, method)
     end
 
     return Expression::Literal.new(previous.literal) if match!([Token::Type::NUMBER, Token::Type::STRING_LIT])

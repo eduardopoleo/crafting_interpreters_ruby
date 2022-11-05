@@ -46,8 +46,9 @@ class Resolver
       raise "A class cant' inherit from itself"
     end
 
-    if !klass.superclass.nil?
-      resolve(klass.superclass)
+    if klass.superclass
+      scopes << {}
+      scopes[-1]["super"] = true
     end
 
     wrap_scope do
@@ -60,7 +61,13 @@ class Resolver
       end
     end
 
+    scopes.pop if klass.superclass
     @current_class = enclosing_class
+    nil
+  end
+
+  def visit_super(super_exp)
+    resolve_local(super_exp, super_exp.keyword)
     nil
   end
  
@@ -69,7 +76,7 @@ class Resolver
     define(function.name)
 
     resolve_function(function)
-    return nil
+    nil
   end
 
   def resolve_function(function, declaration)

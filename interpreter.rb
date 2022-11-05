@@ -166,7 +166,7 @@ class Interpreter
   def visit_class(klass_statement)
     superclass = nil
 
-    if !klass_statement.superclass.nil?
+    if klass_statement.superclass
       superclass = evaluate(klass_statement.superclass)
       if !superclass.is_a?(LoxClass)
         raise RuntimeError.new(
@@ -176,15 +176,20 @@ class Interpreter
       end
     end
 
-    environment.define(klass_statement.name.lexeme, nil)
+    @environment.define(klass_statement.name.lexeme, nil)
+
+    if klass_statement.superclass
+      @environment = Environment.new(@environment)
+      @environment.define('super', superclass)
+    end
+
     methods = {}
     klass_statement.methods.each do |method|
       function = LoxFunction.new(method, environment, method.name.lexeme == 'this')
       methods[method.name.lexeme] = function
     end
     klass = LoxClass.new(klass_statement.name.lexeme, superclass, methods)
-    # this is weird why we use the token here and not the lexeme
-    # why do we do the define and the assing in two steps?
+    @environment = @environment.enclosing if superclass
     environment.assign(klass_statement.name.lexeme, klass)
   end
 
@@ -206,6 +211,22 @@ class Interpreter
       )
     end
     return callee.call(self, arguments);
+  end
+
+  def visit_super(super_exp)
+    distance = locals[super_exp]
+    superclass = environment.get_at(distance, 'super')
+    object = environment.get_at(distance - 1, 'this')
+
+    method = superclass.find_method(super_exp.method.lexeme)
+
+    if method.nil?
+      raise RuntimeError.new(super_exp.method,
+        "Undefined property #{super_exp.method.lexeme}"
+      ) 
+    end
+
+    method.bind(object)
   end
 
   # .field -> .method()
